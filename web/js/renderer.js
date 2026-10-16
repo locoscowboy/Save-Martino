@@ -20,6 +20,7 @@ window.SaveMartino = (function () {
     let latest = null, prev = null, prevAt = 0, latestAt = 0;
     const base = opts.base || '';
     const sfx = createSfx(opts.sfx, !!opts.sound);
+    const music = createMusic(opts.music, !!opts.sound, base);
     const scene = {
       preload() {
         for (const k in ARENAS) this.load.image('arena-' + k, base + '/' + ARENAS[k]);
@@ -48,7 +49,7 @@ window.SaveMartino = (function () {
         this.clock = ui(this.add.text(W - 16, 12, '', { fontFamily: 'monospace', fontSize: '16px', color: '#ecf1ee', stroke: '#000', strokeThickness: 3 }).setOrigin(1, 0));
         this.bubble = ui(this.add.text(0, 0, '', { fontFamily: 'system-ui', fontSize: '16px', color: '#1a0d0b', backgroundColor: '#f7f7f2', padding: { x: 8, y: 4 }, wordWrap: { width: 260 } }).setOrigin(0.5, 1).setVisible(false));
         this.flash = ui(this.add.rectangle(W / 2, H / 2, W, H, 0xffffff, 0.15).setVisible(false));
-        sfx.bind(this);
+        sfx.bind(this); music.bind(this);
         if (opts.sound && opts.onSound) { if (this.sound.locked) this.sound.once('unlocked', () => opts.onSound(true)); else opts.onSound(true); }
       },
       update() {
@@ -150,7 +151,7 @@ window.SaveMartino = (function () {
       }
     };
     const game = new Phaser.Game({ type: Phaser.AUTO, parent, width: W, height: H, backgroundColor: '#1a252c', scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH }, loader: { crossOrigin: 'anonymous' }, scene });
-    return { push(s) { prev = latest; prevAt = latestAt; latest = s; latestAt = performance.now(); sfx.diff(prev, s); }, game };
+    return { push(s) { prev = latest; prevAt = latestAt; latest = s; latestAt = performance.now(); sfx.diff(prev, s); music.sync(prev, s); }, game };
   }
 
   // Sound: plays the clip for every change between two snapshots (an attack frame, a landed hit, a phase change), the way
@@ -159,7 +160,7 @@ window.SaveMartino = (function () {
     const ids = ((manifest && manifest.sounds) || []).map(s => s.id), has = new Set(ids), last = new Map();
     let scene = null;
     const play = (id, { volume = 1, pitch = true, min = 0 } = {}) => {
-      if (!enabled || !scene || !has.has(id)) return;
+      if (!enabled || !scene || scene.sound.locked || !has.has(id)) return;
       const now = performance.now(); if (now - (last.get(id) || -1e9) < Math.max(min, 60)) return; last.set(id, now);
       scene.sound.play(id, { volume, rate: pitch ? 0.95 + Math.random() * 0.1 : 1 });
     };
@@ -202,6 +203,38 @@ window.SaveMartino = (function () {
             if (ba.anim === 'windup' && bb.anim === 'attack') play(variant('whoosh'), { volume: 0.7 });
           } else if (bb.hp < ba.hp) play(variant('hit_light'), { volume: 0.9, min: 90 }); // hits landing while already in the hurt pose
         }
+      }
+    };
+  }
+
+  // Music: one track per phase from content/music.json (menu in the lobby, one per fight, results once), loaded when it is
+  // first needed so the page never fetches all five at once: the fight track loads during the story card before it.
+  // Looped when the manifest says so, faded out on a phase change, kept through a wipe's retry card, quiet under the effects.
+  function createMusic(manifest, enabled, base) {
+    const FIGHT = ['fight_nonna', 'fight_peacock', 'fight_martino'], VOLUME = 0.35;
+    const tracks = new Map(((manifest && manifest.tracks) || []).map(t => [t.id, t]));
+    const requested = new Set();
+    let scene = null, current = null, currentId = null, wanted = null;
+    const ensure = (id) => {
+      if (!scene || !tracks.has(id) || requested.has(id)) return;
+      requested.add(id); scene.load.audio(id, base + '/assets/music/' + id + '.mp3'); scene.load.start();
+    };
+    const apply = () => {
+      if (!scene || scene.sound.locked || wanted === currentId) return;
+      if (wanted && !scene.cache.audio.exists(wanted)) return; // still loading: the current track carries on
+      if (current) { const old = current; scene.tweens.add({ targets: old, volume: 0, duration: 700, onComplete: () => old.stop() }); current = null; currentId = null; }
+      if (wanted) { const t = tracks.get(wanted); current = scene.sound.add(wanted, { loop: !!t.loop, volume: VOLUME }); current.play(); currentId = wanted; }
+    };
+    return {
+      bind(s) { scene = s; if (s.sound.locked) s.sound.once('unlocked', apply); },
+      sync(a, b) {
+        if (!enabled || !scene || !b) return;
+        const act = Math.min(b.act, FIGHT.length - 1);
+        if (b.phase === 'lobby') { wanted = 'menu_select'; ensure('menu_select'); ensure(FIGHT[0]); }
+        else if (b.phase === 'story') { ensure(FIGHT[act]); if (!(a && a.phase === 'fight' && b.wipes > a.wipes) && !(a && a.phase === 'story')) wanted = null; }
+        else if (b.phase === 'fight') { wanted = FIGHT[act]; ensure(wanted); ensure(act < FIGHT.length - 1 ? FIGHT[act + 1] : 'results'); }
+        else if (b.phase === 'results') { if (!a || a.phase !== 'results') wanted = 'results'; ensure('results'); }
+        apply();
       }
     };
   }

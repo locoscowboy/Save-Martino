@@ -48,6 +48,8 @@ Projectiles come from the same sheets: `PROPS` in the tool cuts the plate, the f
 
 `content/sfx.json` lists the clips in `assets/sfx/` (`assets/sfx_fal/` is an alternative generation of the same ids, swap the folder name in `renderer.js` to try it). The team laptop's watch page plays them from the differences between two snapshots (`createSfx` in `renderer.js`): a character's attack or special frame, a landed hit with a random `_b` variant and a ±5 % pitch, the boss' throw/special/hurt/defeat, the story card, the boss intro, the victory fanfare. Volumes follow the manifest's tips: hits 1.0, specials 0.8, UI 0.6. The TV grid is silent. Browsers need one click or key on the page before any sound: the help line in the corner says so until it is unlocked. The phone plays the menu blip on taps.
 
+`content/music.json` lists the background tracks in `assets/music/`: the menu loop in the lobby, one loop per fight, the results track once (`createMusic` in `renderer.js`, volume 0.35). Each track is fetched the first time it is needed, the fight track during the story card before it, so the page never downloads all 10 MB at once. A wipe's retry card keeps the fight music going.
+
 `content/music.json` lists the five background tracks in `assets/music/`: `menu_select` (menu and character select), `fight_nonna`, `fight_peacock`, `fight_martino` (one per story fight) and `results` (the results screen). All are instrumental and meant to loop. They are not wired into the pages yet.
 
 ## Balance
