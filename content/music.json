@@ -9,7 +9,8 @@
       "loop": true,
       "source": "ElevenLabs Music (direct)",
       "edit": "arcade arrangement of the traditional Tarantella Napoletana (public domain), cut to a seamless loop",
-      "song": "Tarantella Napoletana (traditional)"
+      "song": "Tarantella Napoletana (traditional)",
+      "v": "1befa778"
     },
     {
       "id": "fight_nonna",
@@ -17,7 +18,8 @@
       "seconds": 87.4,
       "prompt": "Boss battle music for a video game, loopable, instrumental. An angry Italian grandmother chases heroes around a farm kitchen: frantic tarantella rhythm, accordion and mandolin lead, driving rock drums and distorted bass, brass stabs, clattering pots as percussion accents. Comic but intense, bright and energetic. D minor, 144 bpm, full energy from the first bar, no intro, no fade out, no vocals.",
       "loop": true,
-      "source": "ElevenLabs Music (direct)"
+      "source": "ElevenLabs Music (direct)",
+      "v": "b39e70c7"
     },
     {
       "id": "fight_peacock",
@@ -25,7 +27,8 @@
       "seconds": 82.9,
       "prompt": "Boss battle music for a video game, loopable, instrumental. A vain peacock shows off in hazelnut woods: flamboyant glam rock with a theatrical, show-off feel, big brass fanfares, electric guitar riff, mandolin flourishes, dramatic timpani rolls, bright and pompous. D minor, 144 bpm, driving energy from the first bar, no intro, no fade out, no vocals.",
       "loop": true,
-      "source": "ElevenLabs Music (direct)"
+      "source": "ElevenLabs Music (direct)",
+      "v": "17877685"
     },
     {
       "id": "fight_martino",
@@ -34,7 +37,8 @@
       "prompt": "Instrumental final boss battle theme for a retro arcade fighting game: a little dog turned into a huge monster by AI glasses, fought in Venice. The most epic track of the game. Modern hi-fi chiptune fused with J-rock and orchestral elements, 175 BPM, 4/4. Relentless 16th-note synth bass, heavy compressed drums with big fills, heavy distorted guitars, supersaw walls, frantic chiptune arpeggios, glitchy digital synth textures for the AI glasses. Venetian drama: church organ, choir pads, mandolin tremolo, timpani. Dark urgent minor-key sections building to a heroic, triumphant major-key chorus, an intense shred synth solo. Maximum energy, designed to loop seamlessly, no fade out.",
       "loop": true,
       "source": "ElevenLabs Music v2.5 via fal.ai",
-      "edit": "cut from the 146 s take to a 135 s seamless loop"
+      "edit": "cut from the 146 s take to a 135 s seamless loop",
+      "v": "c9e1e009"
     },
     {
       "id": "results",
@@ -44,7 +48,8 @@
       "loop": false,
       "source": "ElevenLabs Music (direct)",
       "edit": "original instrumental in the spirit of Felicità (Al Bano and Romina Power); not the real recording",
-      "song": "in the spirit of Felicità"
+      "song": "in the spirit of Felicità",
+      "v": "61f17e78"
     }
   ],
   "alt": [

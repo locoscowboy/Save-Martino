@@ -361,7 +361,8 @@ window.SaveMartino = (function () {
     let scene = null, current = null, currentId = null, wanted = null;
     const ensure = (id) => {
       if (!scene || !tracks.has(id) || requested.has(id)) return;
-      requested.add(id); scene.load.audio(id, base + '/assets/music/' + id + '.mp3'); scene.load.start();
+      requested.add(id); const v = tracks.get(id).v; // v: a hash of the file, so a replaced track is never served from a stale cache
+      scene.load.audio(id, base + '/assets/music/' + id + '.mp3' + (v ? '?v=' + v : '')); scene.load.start();
     };
     const apply = () => {
       if (!scene || scene.sound.locked || wanted === currentId) return;

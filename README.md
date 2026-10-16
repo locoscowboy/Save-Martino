@@ -52,7 +52,7 @@ Projectiles come from the same sheets: `PROPS` in the tool cuts the plate, the f
 
 `content/music.json` lists the background tracks in `assets/music/`: the menu loop in the lobby, one loop per fight, the results track from the ending card on (`createMusic` in `renderer.js`, volume 0.35). Each track is fetched the first time it is needed, the fight track during the story card before it, so the page never downloads all 10 MB at once. A wipe's retry card keeps the fight music going.
 
-`content/music.json` lists the five background tracks in `assets/music/`: `menu_select` (menu and character select), `fight_nonna`, `fight_peacock`, `fight_martino` (one per story fight) and `results` (the results screen). All are instrumental and meant to loop. They are not wired into the pages yet.
+Each track in `content/music.json` carries `v`, the first 8 characters of the file's md5; the page adds it to the URL, so a replaced track is never played from a stale cache. When you replace a track, update its `v` (`md5 -q assets/music/<id>.mp3 | cut -c1-8`).
 
 ## Balance
 
