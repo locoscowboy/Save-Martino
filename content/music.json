@@ -1,13 +1,15 @@
 {
-  "note": "Background music, instrumental, picked by Jin on 2026-10-16 from two takes per slot. Files live in assets/music/<id>.mp3, all loudness-matched to -14 LUFS (true peak -1 dB). menu_select, fight_nonna and fight_peacock were made with ElevenLabs Music directly (Italian flavour); fight_martino and results with ElevenLabs Music v2.5 on fal.ai, in the style of the reference track Battita di Ferro. Tracks with loop=true are cut on a bar boundary with a 1 s crossfade of the tail into the head, so play them with loop on and no gap; results plays once.",
+  "note": "Background music, instrumental, picked by Jin on 2026-10-16 from two takes per slot. Files live in assets/music/<id>.mp3, all loudness-matched to -14 LUFS (true peak -1 dB). Jin then switched menu_select to an arcade Tarantella Napoletana and results to a Felicità-spirit instrumental (both ElevenLabs Music direct); the earlier arcade-rock versions are kept in assets/music/alt/. fight_nonna and fight_peacock were made with ElevenLabs Music directly; fight_martino with ElevenLabs Music v2.5 on fal.ai, in the style of the reference track Battita di Ferro. Tracks with loop=true are cut on a bar boundary with a 1 s crossfade of the tail into the head, so play them with loop on and no gap; results plays once.",
   "tracks": [
     {
       "id": "menu_select",
       "plays": "menu and character select",
-      "seconds": 55.0,
-      "prompt": "Video game menu and character select theme, loopable, instrumental. Playful Italian telenovela flavour: bright mandolin and accordion riff over a bouncy retro arcade synth groove, hand claps, tambourine, warm bass. Cheerful, inviting, a little cheeky. D minor to F major, 126 bpm, steady energy from the first bar, no intro, no fade out, no vocals.",
+      "seconds": 56.7,
+      "prompt": "The traditional Neapolitan folk dance Tarantella Napoletana, its famous fast melody, arranged as a retro arcade video game menu theme, instrumental, loopable. Lively 6/8 at 150 bpm, melody on accordion and mandolin doubled by a bright chiptune square-wave lead, tambourine and punchy electronic drums, bouncing bass, hand claps, cheerful and frantic, A minor to A major, steady energy from the first bar, no intro, no fade out, no vocals.",
       "loop": true,
-      "source": "ElevenLabs Music (direct)"
+      "source": "ElevenLabs Music (direct)",
+      "edit": "arcade arrangement of the traditional Tarantella Napoletana (public domain), cut to a seamless loop",
+      "song": "Tarantella Napoletana (traditional)"
     },
     {
       "id": "fight_nonna",
@@ -38,10 +40,21 @@
       "id": "results",
       "plays": "results screen after the run",
       "seconds": 50.1,
-      "prompt": "Instrumental victory and results screen music for a retro arcade game, played while the team's time, deaths and MVP are shown. Modern hi-fi chiptune fused with light J-rock, 120 BPM, 4/4, warm major key. Relaxed groove with punchy drums, bouncy synth bass, bright square-wave lead, sparkling arpeggios, a mandolin and accordion melody for an Italian festa feel. Proud, happy and celebratory but calmer than the battle music, a satisfying 'well done' mood. Steady energy, designed to loop seamlessly, no fade out.",
+      "prompt": "Early 1980s Italian pop love duet hit, instrumental karaoke backing track, in the spirit of a joyful Sanremo festival winner. Mid-tempo 112 bpm, gentle disco-pop drums, warm bouncy bass, bright synth strings, acoustic guitar strums, a sweet very catchy whistle-able chorus melody played by synth lead and mandolin, hand claps, major key, pure happiness, sunny Italian summer, no vocals, clean ending.",
       "loop": false,
-      "source": "ElevenLabs Music v2.5 via fal.ai",
-      "edit": "played once; ends naturally"
+      "source": "ElevenLabs Music (direct)",
+      "edit": "original instrumental in the spirit of Felicità (Al Bano and Romina Power); not the real recording",
+      "song": "in the spirit of Felicità"
+    }
+  ],
+  "alt": [
+    {
+      "file": "alt/menu_select_arcade.mp3",
+      "was": "menu_select before the Italian switch"
+    },
+    {
+      "file": "alt/results_arcade.mp3",
+      "was": "results before the Italian switch"
     }
   ]
 }
