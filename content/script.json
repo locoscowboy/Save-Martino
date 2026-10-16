@@ -18,20 +18,24 @@
       "text": "The glasses crack and fall off. Martino shrinks, shakes himself, and licks the nearest ankle. Martino saved."
     }
   ],
+  "retry": "Everyone is down. {boss} is still standing. Once more, from the last checkpoint.",
   "bosses": {
     "nonna": {
       "intro": "You and your glasses! Too skinny! Sit!",
       "half": "You call that an appetite?",
+      "wipe": "Too skinny, all of you. Eat, then go find him.",
       "defeat": "Fine. Go find him. Take a tupperware."
     },
     "peacock": {
       "intro": "Finally. An audience. No cameras.",
       "half": "You dare pluck me?",
+      "wipe": "Was that the whole audience?",
       "defeat": "I was leaving anyway. Tell the dog to delete the footage."
     },
     "martino": {
       "intro": "GRRR... UPDATING... bark?",
       "half": "WOOF WOOF WOOF",
+      "wipe": "GRRR... RETRYING... bark.",
       "defeat": "yip!"
     }
   },
