@@ -61,7 +61,7 @@ window.SaveMartino = (function () {
         this.bossBar = ui(this.add.graphics());
         this.bossName = ui(this.add.text(W / 2, 62, '', { fontFamily: FONT, fontSize: '22px', color: '#fff1d6', stroke: '#2a0e08', strokeThickness: 6 }).setOrigin(0.5));
         this.clock = ui(this.add.text(W - 16, 12, '', { fontFamily: 'monospace', fontSize: '16px', color: '#ecf1ee', stroke: '#000', strokeThickness: 3 }).setOrigin(1, 0));
-        this.bubble = ui(this.add.text(0, 0, '', { fontFamily: 'system-ui', fontSize: '16px', color: '#1a0d0b', backgroundColor: '#f7f7f2', padding: { x: 8, y: 4 }, wordWrap: { width: 260 } }).setOrigin(0.5, 1).setVisible(false));
+        this.bubble = bubble(this, 0xfff1d6);
         this.flash = ui(this.add.rectangle(W / 2, H / 2, W, H, 0xffffff, 0.15).setVisible(false));
         sfx.bind(this); music.bind(this);
         if (opts.sound && opts.onSound) { if (this.sound.locked) this.sound.once('unlocked', () => opts.onSound(true)); else opts.onSound(true); }
@@ -206,8 +206,8 @@ window.SaveMartino = (function () {
           label('p:' + id, down ? p.name : `${p.name} ${'♥'.repeat(Math.max(0, p.hp))}`, x, ly);
           if (p.say && !down) { // the special line in a bubble over the hero, like the boss's lines
             let bb = this.pBubbles.get(id);
-            if (!bb) { bb = this.add.text(0, 0, '', { fontFamily: 'system-ui', fontSize: '16px', fontStyle: 'bold', color: '#1a0d0b', backgroundColor: '#fff6c9', padding: { x: 8, y: 4 }, wordWrap: { width: 220 } }).setOrigin(0.5, 1).setDepth(9700); this.pBubbles.set(id, bb); }
-            bb.setText(p.say).setPosition(x, ly - 18).setVisible(true);
+            if (!bb) { bb = bubble(this, 0xf4b63b); this.pBubbles.set(id, bb); }
+            bb.show(p.say, x, ly - 21); // the tail points at the name, so the bubble never covers it
           }
           if (down) { // respawn countdown: a ring that fills up and the seconds left, so nobody thinks they are out
             const left = p.downT || p.down || 0, max = s.respawn || 5, frac = 1 - Math.min(1, left / max), cy = y - 40;
@@ -253,7 +253,7 @@ window.SaveMartino = (function () {
           this.bossBar.fillStyle(0xffffff, 0.25).fillRect(bx, 80, w * frac, 4);
           this.bossName.setText(b.name + (b.anim === 'dead' ? ' · defeated' : ''));
           const top = sp ? sp.getBounds().top : y - b.h;
-          if (b.say) this.bubble.setText(b.say.text).setPosition(x, top - 10).setVisible(true); else this.bubble.setVisible(false);
+          if (b.say) this.bubble.show(b.say.text, x, top - 6); else this.bubble.setVisible(false);
         } else { this.bossName.setText(''); this.bubble.setVisible(false); }
 
         for (const pr of s.projectiles) {
@@ -390,6 +390,27 @@ window.SaveMartino = (function () {
         apply();
       }
     };
+  }
+
+  // A comic speech bubble: rounded box with a dark outline, a drop shadow and a tail pointing down at (x, y), kept on screen
+  // and below the boss bar. Pops in when its text changes. Cream for bosses, gold for a hero shouting their special.
+  function bubble(scene, fill) {
+    const c = scene.add.container(0, 0).setDepth(9700).setVisible(false), g = scene.add.graphics();
+    const t = scene.add.text(0, 0, '', { fontFamily: FONT, fontSize: '17px', color: '#2a0e08', align: 'center', lineSpacing: -2, wordWrap: { width: 230 } }).setOrigin(0.5, 1);
+    c.add([g, t]); let last = null;
+    c.show = (text, x, y) => {
+      if (text !== last) { last = text; t.setText(text); c.setScale(0.55); scene.tweens.add({ targets: c, scale: 1, duration: 200, ease: 'Back.Out' }); }
+      const w = Math.ceil(t.width) + 26, h = Math.ceil(t.height) + 14, TAIL = 12;
+      const cx = Math.max(w / 2 + 8, Math.min(W - w / 2 - 8, x)), cy = Math.max(104 + h + TAIL, y), tx = Math.max(-w / 2 + 18, Math.min(w / 2 - 18, x - cx));
+      g.clear();
+      g.fillStyle(0x000000, 0.28).fillRoundedRect(-w / 2 + 4, -h - TAIL + 5, w, h, 12);
+      g.fillStyle(0x2a0e08, 1).fillRoundedRect(-w / 2 - 3, -h - TAIL - 3, w + 6, h + 6, 14).fillTriangle(tx - 13, -TAIL - 2, tx + 11, -TAIL - 2, tx - 3, 3);
+      g.fillStyle(fill, 1).fillRoundedRect(-w / 2, -h - TAIL, w, h, 12).fillTriangle(tx - 8, -TAIL - 2, tx + 6, -TAIL - 2, tx - 3, -3);
+      g.fillStyle(0xffffff, 0.35).fillRoundedRect(-w / 2 + 6, -h - TAIL + 3, w - 12, 4, 2);
+      t.setPosition(0, -TAIL - 6);
+      c.setPosition(cx, cy).setVisible(true);
+    };
+    return c;
   }
 
   function fmt(sec) { const m = Math.floor(sec / 60), s = Math.floor(sec % 60); return `${m}:${String(s).padStart(2, '0')}`; }

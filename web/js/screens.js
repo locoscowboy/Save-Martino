@@ -7,6 +7,8 @@ window.RMScreens = (function () {
   const CAST = [['carlos', 'special', 95, 455, .5, 0], ['jin', 'front', 205, 457, .59, 0], ['oriana', 'special', 318, 457, .43, 0],
     ['bricciola', 'idle', 412, 457, .2, 1], ['euge', 'front', 507, 457, .5, 0], ['quentin', 'front', 612, 457, .5, 1]];
   const LINES = { euge: 'Good boy, Tino!', quentin: 'He is the real boss.', carlos: 'Picanha for Tino!', jin: 'Tino, sit!', oriana: 'Tino is so zen.', bricciola: 'Meow.' };
+  // the MVP's crown: drawn, not an emoji, so it sits on the name tag and looks the same on every device
+  const CROWN = '<svg class="crown" viewBox="0 0 44 30" aria-hidden="true"><path d="M4 26 6 7l9 9 7-13 7 13 9-9 2 19z" fill="#f4b63b" stroke="#2a0e08" stroke-width="3" stroke-linejoin="round"/><path d="M6 21h32" stroke="#2a0e08" stroke-width="2.5"/><circle cx="22" cy="15" r="2.6" fill="#e2452f"/><circle cx="12.5" cy="17.5" r="2" fill="#3db5b0"/><circle cx="31.5" cy="17.5" r="2" fill="#3db5b0"/></svg>';
   const BOSS_POSE = { nonna: ['attack', .5], peacock: ['idle', .45], martino: ['hero', .45] };
 
   function create(host, opts) {
@@ -78,7 +80,8 @@ window.RMScreens = (function () {
       prologue(st, s) {
         if (!s.page) {
           const a = panel(st, 14, 14, 520, 512, { bg: 'farm' }); put(a, 'martino', 'tino', .7, 260, 500);
-          const b = panel(st, 548, 14, 398, 512, { cls: 'dark speed' }); b.style.background = 'radial-gradient(circle at 50% 55%, #4ff3ff, #0b3a52 60%, #071018)'; const bt = put(b, 'martino', 'tino', .66, 200, 500); bt.style.filter = 'drop-shadow(0 0 10px #5ff)'; sfx(b, 'BZZT!', 230, 90, 56, '#7ff');
+          const b = panel(st, 548, 14, 398, 512, { cls: 'dark speed' }); b.style.background = 'radial-gradient(circle at 50% 55%, #4ff3ff, #0b3a52 60%, #071018)'; // the same Tino, now wearing the AI glasses (assets/sprites/tino_glasses.png, 210×245, drawn at the tino frame's scale)
+          const bt = at(el('div', 'rm-fig', b, `<img alt="" src="${base}/assets/sprites/tino_glasses.png" style="display:block;height:${245 * .66}px;margin-left:${-105 * .66}px;margin-top:${-245 * .66}px">`), 200, 500, 4); bt.style.filter = 'drop-shadow(0 0 10px #5ff)'; sfx(b, 'BZZT!', 230, 90, 56, '#7ff');
           return [{ panel: a, cap: cap(st, 26, 26, s.lines[0], 490) }, { panel: b, cap: cap(st, 560, 26, s.lines[1], 370) }];
         }
         const c = panel(st, 14, 14, 520, 512, { cls: 'speed mg-hl' }); c.style.background = 'radial-gradient(circle, #ff6a4a, #6a0f08)'; put(c, 'martino', 'hero', .8, 260, 500); sfx(c, 'GRRR!', 24, 90, 64);
@@ -178,16 +181,18 @@ window.RMScreens = (function () {
         const pose = p.char === 'oriana' ? 'special' : i === 0 ? 'special' : 'front';
         const k = p.char === 'bricciola' ? .3 : p.char === 'oriana' && pose === 'special' ? .43 : .5;
         st.appendChild(at(frame(p.char, pose, k, { flip: x > tinoX, cls: 'rm-breathe' }), x, y, 10));
-        const tag = el('div', 'ti-name' + (i === 0 ? ' ready' : ''), st, esc(p.name) + (i === 0 ? '<small>MVP</small>' : '')); Object.assign(tag.style, { left: x + 'px', top: y - 128 + 'px' });
-        if (i === 0) { const c = el('div', 'rs-crown', st, '👑'); Object.assign(c.style, { left: x + 'px', top: y - 154 + 'px' }); }
+        const tag = el('div', 'ti-name' + (i === 0 ? ' ready mvp' : ''), st, (i === 0 ? CROWN : '') + esc(p.name) + (i === 0 ? '<small>MVP</small>' : '')); Object.assign(tag.style, { left: x + 'px', top: y - 128 + 'px' });
       });
       shadow(st, tinoX, 345, 60); st.appendChild(at(frame('martino', 'tino', .3), tinoX, 345, 11));
       for (let i = 0; i < 3; i++) { const h = el('div', 'ti-heart', st, '♥'); Object.assign(h.style, { left: tinoX - 14 + i * 14 + 'px', top: '240px', zIndex: 12, animationDelay: i * 1.1 + 's' }); }
       const top = Math.max(1, ...ps.map(p => p.dmg));
       const t = el('div', 'rs-team', st, `<div class="rs-k">YOUR TEAM · ${esc(s.code)}</div>` + ps.map((p, i) =>
-        `<div class="rs-p${i === 0 ? ' mvp' : ''}"><span class="face" style="background-image:url(${base}/assets/sprites/${p.char}_front.png)"></span><span>${i === 0 ? '👑 ' : ''}${esc(p.name)}</span><span class="bar"><i style="width:${Math.round(p.dmg / top * 100)}%"></i></span><span class="d">${p.dmg} DMG<br>${p.deaths} DOWN${p.deaths === 1 ? '' : 'S'}</span></div>`).join(''));
+        `<div class="rs-p${i === 0 ? ' mvp' : ''}"><span class="face" style="background-image:url(${base}/assets/sprites/${p.char}_front.png)"></span><span>${i === 0 ? CROWN : ''}${esc(p.name)}</span><span class="bar"><i style="width:${Math.round(p.dmg / top * 100)}%"></i></span><span class="d">${p.dmg} DMG<br>${p.deaths} DOWN${p.deaths === 1 ? '' : 'S'}</span></div>`).join(''));
       const rows = (s.board || []).map(b => `<div class="rs-row${b.mine ? ' mine' : ''}"><span class="rk">${b.rank}</span><span>${b.team.map(m => esc(m.name)).join(', ')}</span><span class="t">${fmt(b.time)}</span><span class="x">${b.deaths} DOWN${b.deaths === 1 ? '' : 'S'}<br>MVP ${esc(b.mvp)}</span></div>`).join('');
       el('div', 'rs-board', st, `<div class="rs-k">ALL TEAMS · FASTEST RESCUE</div>${rows || '<div class="rs-row"><span></span><span>First team to finish!</span></div>'}`);
+      // back to the landing page, where each screen picks phone, team laptop or TV again
+      const home = el('a', 'rs-home', st, '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11.5 12 4l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>HOME');
+      home.href = location.pathname.replace(/[^/]*$/, 'index.html') + (window.SERVER_QS ? '?' + window.SERVER_QS.slice(1) : '');
     }
     function resultsUpdate(s) {
       const ps = Object.values(s.players), waiting = ps.filter(p => !p.ready).length;

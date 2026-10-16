@@ -109,7 +109,12 @@
 .rs-row .rk { font-family: var(--f-pixel); font-size: 12px; text-align: center; }
 .rs-row .t { text-align: right; font-variant-numeric: tabular-nums; }
 .rs-row .x { font-family: var(--f-pixel); font-size: 9px; text-align: right; opacity: .8; }
-.rs-crown { position: absolute; transform: translate(-50%, -100%); z-index: 960; font-size: 26px; animation: ti-bob 1.6s ease-in-out infinite; }
+.ti-name.mvp { padding-top: 3px; }
+.ti-name .crown { position: absolute; left: 50%; top: 0; width: 38px; transform: translate(-50%, -82%); filter: drop-shadow(0 2px 0 rgba(0,0,0,.35)); }
+.rs-p .crown { width: 20px; vertical-align: -3px; margin-right: 5px; }
+.rs-home { position: absolute; left: 16px; top: 16px; z-index: 70; pointer-events: auto; display: inline-flex; align-items: center; gap: 7px; font-family: var(--f-title); font-size: 18px; color: var(--cream); text-decoration: none; background: var(--ink); border: 3px solid var(--outline); border-radius: 10px; padding: 6px 14px 6px 10px; box-shadow: 0 4px 0 var(--outline); cursor: pointer; }
+.rs-home svg { width: 20px; height: 20px; fill: var(--gold); }
+.rs-home:hover { background: var(--tomato); } .rs-home:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--outline); }
 .rs-msg { position: absolute; left: 50%; top: 96px; transform: translateX(-50%); z-index: 60; font-family: var(--f-pixel); font-size: 12px; color: #fff; text-shadow: 0 2px 0 #000; letter-spacing: .12em; white-space: nowrap; animation: rm-blink 1.4s steps(2) infinite; }
 
 @media (prefers-reduced-motion: reduce) { .rm-stage *, .rm-stage *::before, .rm-stage *::after { animation: none !important; transition: none !important; } }
