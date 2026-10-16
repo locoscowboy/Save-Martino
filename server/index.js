@@ -71,26 +71,26 @@ io.on('connection', (socket) => {
   socket.on('disconnect', () => { if (room) room.removePlayer(socket.id); });
 });
 
-// Fixed-timestep simulation at 30 Hz, broadcast at 20 Hz.
+// Fixed-timestep simulation at 30 Hz, catching up after a late timer. Snapshots go out on their own 20 Hz clock so a late
+// simulation tick never delays a send (hooked to the tick, sends drifted to every 66 ms on a shared CPU). Nothing is
+// simulated or serialised for a room nobody is in, and the TV's room list goes out twice a second.
 const TICK = 1 / 30;
-let acc = 0, last = process.hrtime.bigint(), sendAcc = 0;
+let acc = 0, last = process.hrtime.bigint();
 setInterval(() => {
   const now = process.hrtime.bigint();
-  const dt = Number(now - last) / 1e9; last = now;
-  acc += dt; sendAcc += dt;
+  acc += Math.min(0.25, Number(now - last) / 1e9); last = now; // after a long stall, simulate at most a quarter second
   while (acc >= TICK) {
     for (const r of rooms.values()) {
+      if (r.phase === 'lobby' && !r.players.size) continue;
       const events = r.step(TICK);
       for (const ev of events) if (ev.type === 'hit') io.to(ev.id).emit('hit', { id: ev.id });
     }
     acc -= TICK;
   }
-  if (sendAcc >= 1 / 20) {
-    for (const [code, r] of rooms) io.to(code).emit('state', r.snapshot());
-    io.to('__all').emit('rooms', [...rooms.values()].map(r => r.summary()));
-    sendAcc = 0;
-  }
-}, 1000 / 60);
+}, 1000 / 30);
+const occupied = (name) => (io.sockets.adapter.rooms.get(name) || { size: 0 }).size > 0;
+setInterval(() => { for (const [code, r] of rooms) if (occupied(code)) io.to(code).emit('state', r.snapshot()); }, 50);
+setInterval(() => { if (occupied('__all')) io.to('__all').emit('rooms', [...rooms.values()].map(r => r.summary())); }, 500);
 
 // Idle rooms disappear after 10 minutes without players, which frees their code.
 setInterval(() => {

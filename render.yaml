@@ -6,6 +6,7 @@ services:
     name: save-martino
     runtime: node
     plan: free
+    region: frankfurt # Render defaults to Oregon: from Europe that is 250 ms between a tap and the move on screen, Frankfurt is about 70
     rootDir: server
     buildCommand: npm install --omit=dev
     startCommand: npm start
