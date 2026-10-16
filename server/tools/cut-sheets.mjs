@@ -16,12 +16,13 @@ const PAD = 3, GAP = 2, MAX_W = 4096;
 
 // Projectiles and props, cut from detached pieces of the sheets (at: a point inside the piece) or from a box (fade: alpha
 // ramp on the left edge where the box cuts through the drawing). width: target width in the atlas, 2.5x the in-game size.
+// mirror: the box holds the right half of a symmetric prop whose left half is covered on the sheet; it is mirrored to make the whole.
 const PROPS = [
   { name: 'plate', sheet: 'nonna', at: [643, 977], width: 75 },
   { name: 'feather', sheet: 'peacock', at: [694, 1098], width: 110 },
   { name: 'baguette', sheet: 'quentin', at: [2120, 977], width: 60 },
   { name: 'sauce', sheet: 'nonna', box: [1350, 930, 1510, 1065], fade: 30, width: 70 },
-  { name: 'grill', sheet: 'carlos', box: [2050, 1150, 2250, 1475], fade: 40, width: 180, pivot: { x: 0.5, y: 1 } },
+  { name: 'grill', sheet: 'carlos', box: [2106, 1150, 2240, 1440], mirror: true, width: 180, pivot: { x: 0.5, y: 1 } }, // Carlos's tongs cover its left half
 ];
 const CHAR_ROWS = [['front', 'threequarter', 'side', 'back'], ['idle', 'walk1', 'walk2', 'attack', 'special', 'hurt']];
 const BOSS_ROWS = [['idle', 'walk1', 'walk2', 'attack'], ['throw', 'special', 'hurt', 'defeated']];
@@ -121,6 +122,14 @@ function cutProp(def, { img, label, comps }) {
   }
   const f = crop(img, label, fig, [], `props/${def.name}`);
   if (def.fade) for (let y = 0; y < f.h; y++) for (let x = 0; x < def.fade + PAD; x++) f.px[(y * f.w + x) * 4 + 3] *= Math.max(0, x - PAD) / def.fade;
+  if (def.mirror) { // the box's left edge is the axis: put a flipped copy of the half on its left
+    const w = 2 * (f.w - PAD), px = new Uint8Array(w * f.h * 4);
+    for (let y = 0; y < f.h; y++) for (let x = 0; x < w; x++) {
+      const sx = x < f.w - PAD ? f.w - 1 - x : x - (f.w - PAD) + PAD, i = (y * w + x) * 4, j = (y * f.w + sx) * 4;
+      px[i] = f.px[j]; px[i + 1] = f.px[j + 1]; px[i + 2] = f.px[j + 2]; px[i + 3] = f.px[j + 3];
+    }
+    f.w = w; f.px = px;
+  }
   return { name: def.name, ...scale(f, Math.min(1, def.width / f.w)), pivot: def.pivot || { x: 0.5, y: 0.5 } };
 }
 

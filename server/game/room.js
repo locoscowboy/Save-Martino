@@ -74,7 +74,7 @@ export class Room {
     const pages = Array.isArray(card.pages) && card.pages.length ? card.pages : [{ lines: all.length, seconds: card.seconds || 6 }];
     const pg = pages[Math.min(page, pages.length - 1)], offset = pages.slice(0, page).reduce((n, q) => n + (q.lines || 0), 0);
     const lines = all.slice(offset, offset + (pg.lines || all.length - offset));
-    this.phase = 'story'; this.story = { kind, act: this.act, page, pages: pages.length, offset, scene: card.scene || null, lines, allLines: all, text: lines.join(' '), start: this.t, until: this.t + (pg.seconds || card.seconds || 6) };
+    this.phase = 'story'; this.story = { kind, act: this.act, page, pages: pages.length, offset, scene: pg.scene || card.scene || null, lines, allLines: all, text: lines.join(' '), start: this.t, until: this.t + (pg.seconds || card.seconds || 6) };
     this.projectiles = [];
   }
   beginFight() {
@@ -118,7 +118,7 @@ export class Room {
   // ---------- simulation ----------
   step(dt) {
     this.t += dt; this.events = [];
-    if (this.phase === 'story') { const st = this.story; if (this.t >= st.until) { if (st.kind === 'ending') this.finishRun(); else if (st.kind === 'act' && st.page + 1 < st.pages) this.beginStory('act', st.page + 1); else this.beginFight(); } return this.events; }
+    if (this.phase === 'story') { const st = this.story; if (this.t >= st.until) { if (st.kind !== 'retry' && st.page + 1 < st.pages) this.beginStory(st.kind, st.page + 1); else if (st.kind === 'ending') this.finishRun(); else this.beginFight(); } return this.events; }
     if (this.phase !== 'fight') return this.events;
     this.clock += dt;
     for (const p of this.players.values()) this.stepPlayer(p, this.inputs.get(p.id), dt);
@@ -153,6 +153,7 @@ export class Room {
       inp.special = false;
       if (p.cd <= 0) {
         const m = MECHANICS[p.mechanic] || MECHANICS.burst; p.cd = m.cooldown; p.anim = 'special'; p.attackT = 0.3; p.swings += 1;
+        const said = ((this.script.cast || {})[p.char] || {}).special; if (said) p.say = { text: said, until: this.t + 2.5 }; // the hero shouts the special, like the boss lines
         if (p.mechanic === 'burst') for (let i = 0; i < m.count; i++) this.spawn({ kind: this.roster.find(r => r.id === p.char)?.projectile || 'baguette', x: p.x + p.facing * 30, y: p.y + (i - 1) * 18, vx: p.facing * m.speed, vy: 0, owner: p.id, dmg: m.dmg, ttl: 2 });
         if (p.mechanic === 'slam') this.hitBossIf(p, this.boss && Math.hypot(p.x - this.boss.x, p.y - this.boss.y) < m.radius + this.boss.def.w / 2, m.dmg);
         if (p.mechanic === 'dash') { p.dashT = 0.25; p.invuln = 0.4; p.dashId = this.nextId++; }
@@ -259,7 +260,7 @@ export class Room {
   // ---------- output ----------
   snapshot() {
     const players = {};
-    for (const p of this.players.values()) players[p.id] = { name: p.name, char: p.char, x: Math.round(p.x), y: Math.round(p.y), facing: p.facing, anim: p.anim, swings: p.swings, hp: p.hp, cd: Math.round(p.cd * 10) / 10, cdMax: (MECHANICS[p.mechanic] || MECHANICS.burst).cooldown, deaths: p.deaths, dmg: p.dmg, ready: p.ready, down: p.down > 0 ? Math.ceil(p.down) : 0, downT: p.down > 0 ? Math.round(p.down * 10) / 10 : 0 };
+    for (const p of this.players.values()) players[p.id] = { name: p.name, char: p.char, x: Math.round(p.x), y: Math.round(p.y), facing: p.facing, anim: p.anim, swings: p.swings, say: p.say && p.say.until > this.t ? p.say.text : null, hp: p.hp, cd: Math.round(p.cd * 10) / 10, cdMax: (MECHANICS[p.mechanic] || MECHANICS.burst).cooldown, deaths: p.deaths, dmg: p.dmg, ready: p.ready, down: p.down > 0 ? Math.ceil(p.down) : 0, downT: p.down > 0 ? Math.round(p.down * 10) / 10 : 0 };
     const b = this.boss;
     return {
       t: Math.round(this.t * 100) / 100, room: this.code, respawn: PLAYER.respawn, code: this.code, host: this.hostId, maxPlayers: MAX_PLAYERS, maxHp: PLAYER.hp, canStart: this.canStart(),

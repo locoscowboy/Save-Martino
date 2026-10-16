@@ -1,5 +1,5 @@
 {
-  "note": "Sound effects generated with ElevenLabs text-to-sound-effects, then trimmed of silence, peak-normalised to -1 dBFS and limited. Files live in assets/sfx/<id>.mp3. Play 'attack' on the attack frame, 'special' on the special frame, 'hit' when a hit lands, 'hurt' on the hurt frame.",
+  "note": "Sound effects generated with ElevenLabs text-to-sound-effects, then trimmed of silence, peak-normalised to -1 dBFS and limited. Files live in assets/sfx/<id>.mp3. Play 'attack' on the attack frame, 'special' on the special frame, 'hit' when a hit lands, 'hurt' on the hurt frame. Voice lines (voice_<hero>) are ElevenLabs text-to-speech (eleven_v3) with accented library voices chosen per character, trimmed and peak-normalised like the rest; alternate takes live in assets/sfx/alt. Second pass 2026-10-16: eleven_v3 with emotion tags ([shouting excitedly] etc.), stability 0, ElevenLabs audio isolation for a clean background (pad to 5 s first, the endpoint needs 4.6 s), then trimmed and sped up 10 %.",
   "sounds": [
     {
       "id": "ui_boss_intro",
@@ -223,8 +223,15 @@
     {
       "id": "oriana_attack",
       "group": "oriana",
-      "seconds": 1.0,
-      "prompt": "Single tibetan singing bowl strike with a short shimmering ring"
+      "seconds": 0.6,
+      "prompt": "Short martial arts palm strike, quick whoosh then a soft thump, cartoon, clean",
+      "note": "Replaced 2026-10-16: the singing-bowl strike got tiring when spammed. oriana_attack_b is a softer whoosh-and-slap variant the renderer picks at random."
+    },
+    {
+      "id": "oriana_attack_b",
+      "group": "oriana",
+      "seconds": 0.6,
+      "prompt": "Quick soft air whoosh swipe ending in a light palm slap, cartoon fighting game, short, dry"
     },
     {
       "id": "oriana_special",
@@ -273,6 +280,61 @@
       "group": "quentin",
       "seconds": 1.5,
       "prompt": "Rapid burst of three crunchy baguette chunks firing one after another with whooshes, cartoon"
+    },
+    {
+      "id": "voice_euge",
+      "group": "voice",
+      "seconds": 2.0,
+      "prompt": "Remo Grande!",
+      "voice": "Antonio, lively young Italian man (ElevenLabs library), shouted take",
+      "alt": "alt/voice_euge_take2.mp3: second take, same voice"
+    },
+    {
+      "id": "voice_quentin",
+      "group": "voice",
+      "seconds": 1.1,
+      "prompt": "Bagarre!",
+      "voice": "Jamie, native French speaker (ElevenLabs library), shouted \"Bagarre !\" in French",
+      "alt": "alt/voice_quentin_take2.mp3: second take, same voice"
+    },
+    {
+      "id": "voice_jin",
+      "group": "voice",
+      "seconds": 1.5,
+      "prompt": "Chopstick lightning!",
+      "voice": "Jin's own cloned voice (ElevenLabs), shouted take",
+      "alt": "alt/voice_jin_take2.mp3: second take, same voice"
+    },
+    {
+      "id": "voice_oriana",
+      "group": "voice",
+      "seconds": 3.0,
+      "prompt": "Breathe in... breathe out.",
+      "voice": "Ginevra, young Italian woman (ElevenLabs library), energetic encouraging take",
+      "alt": "alt/voice_oriana_take2.mp3: second take, same voice"
+    },
+    {
+      "id": "voice_carlos",
+      "group": "voice",
+      "seconds": 2.1,
+      "prompt": "Picanha on the grill!",
+      "voice": "Carlos, energetic middle-aged man with a Spanish accent (ElevenLabs library), shouted with joy",
+      "alt": "alt/voice_carlos_take2.mp3: second take, same voice"
+    },
+    {
+      "id": "voice_bricciola",
+      "group": "voice",
+      "seconds": 1.8,
+      "prompt": "A cute cat meow followed by a happy purr",
+      "voice": "ElevenLabs sound effect: real meow and purr, no voice"
+    },
+    {
+      "id": "voice_tino",
+      "group": "voice",
+      "seconds": 4.2,
+      "prompt": "You saved me! Grazie mille! Tino love you!",
+      "voice": "Ginevra (Italian) pitched up 3 semitones, very happy take",
+      "alt": "alt/voice_tino_take2.mp3: second take, same voice"
     }
   ],
   "playback_tips": [

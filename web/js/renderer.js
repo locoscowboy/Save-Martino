@@ -34,7 +34,7 @@ window.SaveMartino = (function () {
         this.arena = this.add.image(W / 2, H / 2, '__DEFAULT').setDisplaySize(W, H).setVisible(false).setDepth(0);
         this.ground = this.add.graphics().setDepth(1); // shadows and the grill's heat, under everyone
         this.sprites = new Map(); this.labels = new Map(); this.dirs = new Map();
-        this.fx = new Map(); this.bfx = { flashUntil: 0, kx: 0, ghost: 1, hitAt: -1e9, atkAt: -1e9, lastGhost: 0 }; this.ghosts = 0; this.rings = new Map(); this.lastPuff = new Map();
+        this.fx = new Map(); this.bfx = { flashUntil: 0, kx: 0, ghost: 1, hitAt: -1e9, atkAt: -1e9, lastGhost: 0 }; this.ghosts = 0; this.rings = new Map(); this.pBubbles = new Map(); this.lastPuff = new Map();
         this.hud = this.add.graphics().setDepth(9001);
         const g = this.make.graphics({ add: false }); g.fillStyle(0xffffff, 1); g.fillCircle(16, 16, 16); g.generateTexture('dot', 32, 32); g.destroy();
         // a swing crescent (opens to the right) and a four-point spark, white so a tint can colour them
@@ -61,7 +61,7 @@ window.SaveMartino = (function () {
         this.bossBar = ui(this.add.graphics());
         this.bossName = ui(this.add.text(W / 2, 62, '', { fontFamily: FONT, fontSize: '22px', color: '#fff1d6', stroke: '#2a0e08', strokeThickness: 6 }).setOrigin(0.5));
         this.clock = ui(this.add.text(W - 16, 12, '', { fontFamily: 'monospace', fontSize: '16px', color: '#ecf1ee', stroke: '#000', strokeThickness: 3 }).setOrigin(1, 0));
-        this.bubble = ui(this.add.text(0, 0, '', { fontFamily: 'system-ui', fontSize: '16px', color: '#1a0d0b', backgroundColor: '#f7f7f2', padding: { x: 8, y: 4 }, wordWrap: { width: 260 } }).setOrigin(0.5, 1).setVisible(false));
+        this.bubble = bubble(this, 0xfff1d6);
         this.flash = ui(this.add.rectangle(W / 2, H / 2, W, H, 0xffffff, 0.15).setVisible(false));
         sfx.bind(this); music.bind(this);
         if (opts.sound && opts.onSound) { if (this.sound.locked) this.sound.once('unlocked', () => opts.onSound(true)); else opts.onSound(true); }
@@ -169,6 +169,7 @@ window.SaveMartino = (function () {
         };
 
         const vel = (a, b) => a ? (b.x - a.x) / Math.max(30, span) * 1000 : 0; // px per second between the two snapshots
+        for (const bb of this.pBubbles.values()) bb.setVisible(false); // a hero's special line, shown below while it lasts
         for (const [id, p] of Object.entries(s.players)) {
           const pp = prev && prev.players[id]; const x = pp ? lerp(pp.x, p.x) : p.x, y = pp ? lerp(pp.y, p.y) : p.y, vx = vel(pp, p);
           g.fillStyle(0x000000, 0.3); g.fillEllipse(x, y, 50, 14);
@@ -214,6 +215,11 @@ window.SaveMartino = (function () {
           const top = sp ? sp.getBounds().top : y - PLAYER_H;
           const ly = down ? y - 70 : Math.min(top, y - 24) - 12;
           label('p:' + id, down ? p.name : `${p.name} ${'♥'.repeat(Math.max(0, p.hp))}`, x, ly);
+          if (p.say && !down) { // the special line in a bubble over the hero, like the boss's lines
+            let bb = this.pBubbles.get(id);
+            if (!bb) { bb = bubble(this, 0xf4b63b); this.pBubbles.set(id, bb); }
+            bb.show(p.say, x, ly - 21); // the tail points at the name, so the bubble never covers it
+          }
           if (down) { // respawn countdown: a ring that fills up and the seconds left, so nobody thinks they are out
             const left = p.downT || p.down || 0, max = s.respawn || 5, frac = 1 - Math.min(1, left / max), cy = y - 40;
             this.hud.fillStyle(0x13151b, 0.75).fillCircle(x, cy, 25);
@@ -258,7 +264,7 @@ window.SaveMartino = (function () {
           this.bossBar.fillStyle(0xffffff, 0.25).fillRect(bx, 80, w * frac, 4);
           this.bossName.setText(b.name + (b.anim === 'dead' ? ' · defeated' : ''));
           const top = sp ? sp.getBounds().top : y - b.h;
-          if (b.say) this.bubble.setText(b.say.text).setPosition(x, top - 10).setVisible(true); else this.bubble.setVisible(false);
+          if (b.say) this.bubble.show(b.say.text, x, top - 6); else this.bubble.setVisible(false);
         } else { this.bossName.setText(''); this.bubble.setVisible(false); }
 
         for (const pr of s.projectiles) {
@@ -314,7 +320,7 @@ window.SaveMartino = (function () {
     const ids = ((manifest && manifest.sounds) || []).map(s => s.id), has = new Set(ids), last = new Map();
     let scene = null;
     const play = (id, { volume = 1, pitch = true, min = 0 } = {}) => {
-      if (!enabled || !scene || scene.sound.locked || !has.has(id)) return;
+      if (!enabled || !scene || scene.sound.locked || !has.has(id) || !scene.cache.audio.exists(id)) return; // a clip that failed to load (not generated yet) stays silent
       const now = performance.now(); if (now - (last.get(id) || -1e9) < Math.max(min, 60)) return; last.set(id, now);
       scene.sound.play(id, { volume, rate: pitch ? 0.95 + Math.random() * 0.1 : 1 });
     };
@@ -334,6 +340,7 @@ window.SaveMartino = (function () {
           if (b.phase === 'fight') play('ui_boss_intro', { volume: 0.6, pitch: false });
           if (b.phase === 'results') { play('ui_victory', { volume: 0.6, pitch: false }); play('tino_yip', { volume: 0.8 }); }
         }
+        if (b.phase === 'story' && b.story && b.story.scene === 'rescue' && !(a.story && a.story.scene === 'rescue')) play('voice_tino', { volume: 1, pitch: false }); // the rescue screen: Tino says thank you
         if (b.phase === 'lobby' || b.phase === 'results') {
           const ready = (s) => Object.values(s.players).filter(p => p.ready).length;
           if (Object.keys(b.players).length > Object.keys(a.players).length || ready(b) > ready(a)) play('ui_select', { volume: 0.6 });
@@ -343,7 +350,7 @@ window.SaveMartino = (function () {
           if (p.anim === 'attack' && p.anim === q.anim && p.swings !== q.swings) play(p.char + '_attack', { volume: 0.8, min: 100 }); // mashing keeps the pose, so count swings
           if (p.anim !== q.anim) {
             if (p.anim === 'attack') play(p.char + '_attack', { volume: 0.8, min: 100 });
-            if (p.anim === 'special') play(p.char + '_special', { volume: 0.8 });
+            if (p.anim === 'special') { play(p.char + '_special', { volume: 0.8 }); play('voice_' + p.char, { volume: 1, pitch: false }); }
             if (p.anim === 'hurt') { play(variant('hit_light'), { volume: 1 }); play('hurt_player', { volume: 0.7, min: 150 }); }
             if (p.anim === 'down') play('down_player', { volume: 0.9 });
           }
@@ -372,7 +379,8 @@ window.SaveMartino = (function () {
     let scene = null, current = null, currentId = null, wanted = null;
     const ensure = (id) => {
       if (!scene || !tracks.has(id) || requested.has(id)) return;
-      requested.add(id); scene.load.audio(id, base + '/assets/music/' + id + '.mp3'); scene.load.start();
+      requested.add(id); const v = tracks.get(id).v; // v: a hash of the file, so a replaced track is never served from a stale cache
+      scene.load.audio(id, base + '/assets/music/' + id + '.mp3' + (v ? '?v=' + v : '')); scene.load.start();
     };
     const apply = () => {
       if (!scene || scene.sound.locked || wanted === currentId) return;
@@ -393,6 +401,27 @@ window.SaveMartino = (function () {
         apply();
       }
     };
+  }
+
+  // A comic speech bubble: rounded box with a dark outline, a drop shadow and a tail pointing down at (x, y), kept on screen
+  // and below the boss bar. Pops in when its text changes. Cream for bosses, gold for a hero shouting their special.
+  function bubble(scene, fill) {
+    const c = scene.add.container(0, 0).setDepth(9700).setVisible(false), g = scene.add.graphics();
+    const t = scene.add.text(0, 0, '', { fontFamily: FONT, fontSize: '17px', color: '#2a0e08', align: 'center', lineSpacing: -2, wordWrap: { width: 230 } }).setOrigin(0.5, 1);
+    c.add([g, t]); let last = null;
+    c.show = (text, x, y) => {
+      if (text !== last) { last = text; t.setText(text); c.setScale(0.55); scene.tweens.add({ targets: c, scale: 1, duration: 200, ease: 'Back.Out' }); }
+      const w = Math.ceil(t.width) + 26, h = Math.ceil(t.height) + 14, TAIL = 12;
+      const cx = Math.max(w / 2 + 8, Math.min(W - w / 2 - 8, x)), cy = Math.max(104 + h + TAIL, y), tx = Math.max(-w / 2 + 18, Math.min(w / 2 - 18, x - cx));
+      g.clear();
+      g.fillStyle(0x000000, 0.28).fillRoundedRect(-w / 2 + 4, -h - TAIL + 5, w, h, 12);
+      g.fillStyle(0x2a0e08, 1).fillRoundedRect(-w / 2 - 3, -h - TAIL - 3, w + 6, h + 6, 14).fillTriangle(tx - 13, -TAIL - 2, tx + 11, -TAIL - 2, tx - 3, 3);
+      g.fillStyle(fill, 1).fillRoundedRect(-w / 2, -h - TAIL, w, h, 12).fillTriangle(tx - 8, -TAIL - 2, tx + 6, -TAIL - 2, tx - 3, -3);
+      g.fillStyle(0xffffff, 0.35).fillRoundedRect(-w / 2 + 6, -h - TAIL + 3, w - 12, 4, 2);
+      t.setPosition(0, -TAIL - 6);
+      c.setPosition(cx, cy).setVisible(true);
+    };
+    return c;
   }
 
   function fmt(sec) { const m = Math.floor(sec / 60), s = Math.floor(sec % 60); return `${m}:${String(s).padStart(2, '0')}`; }
