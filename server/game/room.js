@@ -104,7 +104,7 @@ export class Room {
       inp.special = false;
       if (p.cd <= 0) {
         const m = MECHANICS[p.mechanic] || MECHANICS.burst; p.cd = m.cooldown; p.anim = 'special'; p.attackT = 0.3;
-        if (p.mechanic === 'burst') for (let i = 0; i < m.count; i++) this.spawn({ kind: this.roster.find(r => r.id === p.char)?.projectile || 'salame', x: p.x + p.facing * 30, y: p.y + (i - 1) * 18, vx: p.facing * m.speed, vy: 0, owner: p.id, dmg: m.dmg, ttl: 2 });
+        if (p.mechanic === 'burst') for (let i = 0; i < m.count; i++) this.spawn({ kind: this.roster.find(r => r.id === p.char)?.projectile || 'baguette', x: p.x + p.facing * 30, y: p.y + (i - 1) * 18, vx: p.facing * m.speed, vy: 0, owner: p.id, dmg: m.dmg, ttl: 2 });
         if (p.mechanic === 'slam') this.hitBossIf(p, this.boss && Math.hypot(p.x - this.boss.x, p.y - this.boss.y) < m.radius + this.boss.def.w / 2, m.dmg);
         if (p.mechanic === 'dash') { p.dashT = 0.25; p.invuln = 0.4; }
         if (p.mechanic === 'heal') {

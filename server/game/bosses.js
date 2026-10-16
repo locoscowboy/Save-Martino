@@ -51,8 +51,8 @@ export const BOSSES = [
 
 // Player specials: five mechanics under the hood, one per character in content/roster.json.
 export const MECHANICS = {
-  burst: { cooldown: 8,  dmg: 12, count: 3, speed: 520 },        // three projectiles forward (Gio, salame)
-  slam:  { cooldown: 10, dmg: 30, radius: 110 },                 // area hit around the player (Quentin, baguette)
+  burst: { cooldown: 8,  dmg: 12, count: 3, speed: 520 },        // three projectiles forward (Quentin, baguette chunks)
+  slam:  { cooldown: 10, dmg: 30, radius: 110 },                 // area hit around the player (Euge, paddle sweep)
   dash:  { cooldown: 7,  dmg: 18, dist: 260 },                   // dash forward, hits what it crosses (Jin, chopsticks)
   heal:  { cooldown: 14, hearts: 1, sit: 1.0 },                  // teammate with the fewest hearts gets one back (Oriana, zen sitting)
   zone:  { cooldown: 12, dmg: 6, every: 0.5, duration: 4, radius: 90 } // grill on the ground, burns the boss standing in it (Carlos, picanha)

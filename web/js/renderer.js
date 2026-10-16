@@ -4,7 +4,7 @@ window.SaveMartino = (function () {
   const W = 960, H = 540;
   const ARENAS = { farm: 'assets/arenas/farm.jpg', woods: 'assets/arenas/woods.jpg', venice: 'assets/arenas/venice.jpg' };
   const COLORS = { euge: 0x1f6fb2, quentin: 0xe2c044, jin: 0xd23a2c, oriana: 0x9b6bd6, carlos: 0x2e8b57 };
-  const PROJ = { pizza: 0xf2b84a, bolognese: 0xb23a2c, plate: 0xffffff, feather: 0x3db5b0, pigeon: 0x9aa0a6, bite: 0x7a3b2e, grill: 0xff7a1a, default: 0xcccccc };
+  const PROJ = { pizza: 0xf2b84a, bolognese: 0xb23a2c, plate: 0xffffff, feather: 0x3db5b0, pigeon: 0x9aa0a6, bite: 0x7a3b2e, grill: 0xff7a1a, baguette: 0xd9a030, chopstick: 0x8b5a2b, splash: 0x5fb6e6, om: 0x9b6bd6, ember: 0xff7a1a, default: 0xcccccc };
 
   function createRenderer(parent, opts) {
     let latest = null, prev = null, prevAt = 0, latestAt = 0;
