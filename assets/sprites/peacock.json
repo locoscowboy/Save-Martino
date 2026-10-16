@@ -1,0 +1,210 @@
+{
+ "frames": {
+  "idle": {
+   "frame": {
+    "x": 0,
+    "y": 0,
+    "w": 295,
+    "h": 400
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 295,
+    "h": 400
+   },
+   "sourceSize": {
+    "w": 295,
+    "h": 400
+   },
+   "pivot": {
+    "x": 0.304,
+    "y": 1
+   }
+  },
+  "walk1": {
+   "frame": {
+    "x": 297,
+    "y": 0,
+    "w": 338,
+    "h": 397
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 338,
+    "h": 397
+   },
+   "sourceSize": {
+    "w": 338,
+    "h": 397
+   },
+   "pivot": {
+    "x": 0.617,
+    "y": 1
+   }
+  },
+  "walk2": {
+   "frame": {
+    "x": 637,
+    "y": 0,
+    "w": 391,
+    "h": 388
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 391,
+    "h": 388
+   },
+   "sourceSize": {
+    "w": 391,
+    "h": 388
+   },
+   "pivot": {
+    "x": 0.736,
+    "y": 1
+   }
+  },
+  "attack": {
+   "frame": {
+    "x": 1030,
+    "y": 0,
+    "w": 549,
+    "h": 294
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 549,
+    "h": 294
+   },
+   "sourceSize": {
+    "w": 549,
+    "h": 294
+   },
+   "pivot": {
+    "x": 0.409,
+    "y": 1
+   }
+  },
+  "throw": {
+   "frame": {
+    "x": 1581,
+    "y": 0,
+    "w": 472,
+    "h": 338
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 472,
+    "h": 338
+   },
+   "sourceSize": {
+    "w": 472,
+    "h": 338
+   },
+   "pivot": {
+    "x": 0.221,
+    "y": 1
+   }
+  },
+  "special": {
+   "frame": {
+    "x": 2055,
+    "y": 0,
+    "w": 475,
+    "h": 394
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 475,
+    "h": 394
+   },
+   "sourceSize": {
+    "w": 475,
+    "h": 394
+   },
+   "pivot": {
+    "x": 0.487,
+    "y": 1
+   }
+  },
+  "hurt": {
+   "frame": {
+    "x": 2532,
+    "y": 0,
+    "w": 313,
+    "h": 340
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 313,
+    "h": 340
+   },
+   "sourceSize": {
+    "w": 313,
+    "h": 340
+   },
+   "pivot": {
+    "x": 0.666,
+    "y": 1
+   }
+  },
+  "defeated": {
+   "frame": {
+    "x": 2847,
+    "y": 0,
+    "w": 406,
+    "h": 204
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 406,
+    "h": 204
+   },
+   "sourceSize": {
+    "w": 406,
+    "h": 204
+   },
+   "pivot": {
+    "x": 0.238,
+    "y": 1
+   }
+  }
+ },
+ "meta": {
+  "app": "save-martino cut-sheets",
+  "image": "peacock.png",
+  "size": {
+   "w": 3253,
+   "h": 400
+  },
+  "scale": "1",
+  "facing": -1,
+  "idle": {
+   "w": 295,
+   "h": 400
+  }
+ }
+}

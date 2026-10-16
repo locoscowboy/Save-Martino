@@ -8,13 +8,17 @@
     "start": "node index.js",
     "dev": "node --watch index.js",
     "sim": "node tools/sim.mjs",
-    "e2e": "node tools/e2e.mjs"
+    "e2e": "node tools/e2e.mjs",
+    "sprites": "node tools/cut-sheets.mjs",
+    "shots": "node tools/shots.mjs"
   },
   "dependencies": {
     "express": "^4.21.2",
     "socket.io": "^4.8.1"
   },
   "devDependencies": {
+    "puppeteer-core": "^23.11.1",
+    "sharp": "^0.33.5",
     "socket.io-client": "^4.8.1"
   }
 }

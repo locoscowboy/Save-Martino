@@ -12,6 +12,8 @@ const ROOT = path.join(__dirname, '..');
 const PORT = process.env.PORT || 3000;
 
 const app = express();
+// The Netlify pages fetch content and textures from here: without this header the roster fetch fails and WebGL refuses the images.
+app.use((_req, res, next) => { res.setHeader('Access-Control-Allow-Origin', '*'); next(); });
 app.use(express.static(path.join(ROOT, 'web')));
 app.use('/content', express.static(path.join(ROOT, 'content')));
 app.use('/assets', express.static(path.join(ROOT, 'assets')));
