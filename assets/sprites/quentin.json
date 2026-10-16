@@ -1,0 +1,258 @@
+{
+ "frames": {
+  "front": {
+   "frame": {
+    "x": 0,
+    "y": 0,
+    "w": 144,
+    "h": 254
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 144,
+    "h": 254
+   },
+   "sourceSize": {
+    "w": 144,
+    "h": 254
+   },
+   "pivot": {
+    "x": 0.343,
+    "y": 1
+   }
+  },
+  "threequarter": {
+   "frame": {
+    "x": 146,
+    "y": 0,
+    "w": 144,
+    "h": 254
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 144,
+    "h": 254
+   },
+   "sourceSize": {
+    "w": 144,
+    "h": 254
+   },
+   "pivot": {
+    "x": 0.29,
+    "y": 1
+   }
+  },
+  "side": {
+   "frame": {
+    "x": 292,
+    "y": 0,
+    "w": 125,
+    "h": 251
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 125,
+    "h": 251
+   },
+   "sourceSize": {
+    "w": 125,
+    "h": 251
+   },
+   "pivot": {
+    "x": 0.348,
+    "y": 1
+   }
+  },
+  "back": {
+   "frame": {
+    "x": 419,
+    "y": 0,
+    "w": 145,
+    "h": 257
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 145,
+    "h": 257
+   },
+   "sourceSize": {
+    "w": 145,
+    "h": 257
+   },
+   "pivot": {
+    "x": 0.381,
+    "y": 1
+   }
+  },
+  "idle": {
+   "frame": {
+    "x": 566,
+    "y": 0,
+    "w": 106,
+    "h": 240
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 106,
+    "h": 240
+   },
+   "sourceSize": {
+    "w": 106,
+    "h": 240
+   },
+   "pivot": {
+    "x": 0.386,
+    "y": 1
+   }
+  },
+  "walk1": {
+   "frame": {
+    "x": 674,
+    "y": 0,
+    "w": 108,
+    "h": 235
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 108,
+    "h": 235
+   },
+   "sourceSize": {
+    "w": 108,
+    "h": 235
+   },
+   "pivot": {
+    "x": 0.592,
+    "y": 1
+   }
+  },
+  "walk2": {
+   "frame": {
+    "x": 784,
+    "y": 0,
+    "w": 125,
+    "h": 233
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 125,
+    "h": 233
+   },
+   "sourceSize": {
+    "w": 125,
+    "h": 233
+   },
+   "pivot": {
+    "x": 0.564,
+    "y": 1
+   }
+  },
+  "attack": {
+   "frame": {
+    "x": 911,
+    "y": 0,
+    "w": 250,
+    "h": 233
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 250,
+    "h": 233
+   },
+   "sourceSize": {
+    "w": 250,
+    "h": 233
+   },
+   "pivot": {
+    "x": 0.248,
+    "y": 1
+   }
+  },
+  "special": {
+   "frame": {
+    "x": 1163,
+    "y": 0,
+    "w": 219,
+    "h": 219
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 219,
+    "h": 219
+   },
+   "sourceSize": {
+    "w": 219,
+    "h": 219
+   },
+   "pivot": {
+    "x": 0.328,
+    "y": 1
+   }
+  },
+  "hurt": {
+   "frame": {
+    "x": 1384,
+    "y": 0,
+    "w": 153,
+    "h": 239
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 153,
+    "h": 239
+   },
+   "sourceSize": {
+    "w": 153,
+    "h": 239
+   },
+   "pivot": {
+    "x": 0.658,
+    "y": 1
+   }
+  }
+ },
+ "meta": {
+  "app": "save-martino cut-sheets",
+  "image": "quentin.png",
+  "size": {
+   "w": 1537,
+   "h": 257
+  },
+  "scale": "1",
+  "facing": 1,
+  "idle": {
+   "w": 106,
+   "h": 240
+  }
+ }
+}
