@@ -7,24 +7,22 @@
 <style>
   body { margin: 0; font-family: system-ui, sans-serif; background: #111a1f; color: #ecf1ee; padding: 24px; }
   h1 { font-size: 2rem; margin: 0 0 8px; } p { color: #9fb1b6; max-width: 60ch; }
-  .rooms { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); margin-top: 20px; }
-  .room { background: #1a252c; border: 1px solid #2e3e47; border-radius: 6px; padding: 14px; display: grid; gap: 6px; }
-  a { color: #3db5b0; } .room b { font-size: 1.1rem; text-transform: capitalize; }
+  .links { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); margin-top: 20px; max-width: 760px; }
+  .link { background: #1a252c; border: 1px solid #2e3e47; border-radius: 6px; padding: 14px; display: grid; gap: 6px; }
+  a { color: #3db5b0; } .link b { font-size: 1.1rem; }
 </style>
 </head>
 <body>
 <h1>Save Martino</h1>
-<p>Pick your team's room. Phones open the controller, the team laptop opens the watch page, the TV opens the grid.</p>
-<p><a href="watch.html?room=all">TV: all rooms</a></p>
-<div class="rooms" id="rooms"></div>
+<p>Co-op boss rush. One phone per player, one laptop per team, the TV watches every team.</p>
+<div class="links">
+  <div class="link"><b>Phone</b><span>Host a game and share the 4-letter code, or join with a code.</span><a id="phone" href="phone.html">Open the controller</a></div>
+  <div class="link"><b>Team laptop</b><span>Shows the arena, the code and a QR code for teammates.</span><a id="watch" href="watch.html">Open the watch page</a></div>
+  <div class="link"><b>TV</b><span>Every live game in a grid.</span><a id="tv" href="watch.html?room=all">Open the grid</a></div>
+</div>
 <script src="js/config.js"></script>
 <script>
-  const host = document.getElementById('rooms');
-  for (const r of window.ROOMS) {
-    const d = document.createElement('div'); d.className = 'room';
-    d.innerHTML = `<b>${r}</b><a href="phone.html?room=${r}">Phone controller</a><a href="watch.html?room=${r}">Laptop watch page</a>`;
-    host.appendChild(d);
-  }
+  if (window.SERVER_QS) for (const id of ['phone', 'watch', 'tv']) { const a = document.getElementById(id); a.href += (a.href.includes('?') ? '' : '?') + window.SERVER_QS; }
 </script>
 </body>
 </html>

@@ -48,9 +48,9 @@ window.SaveMartino = (function () {
         if (s.boss) { const w = 520, x = (W - w) / 2; this.bossBar.fillStyle(0x000000, 0.6).fillRect(x, 80, w, 14); this.bossBar.fillStyle(s.boss.phase === 2 ? 0xf05a4c : 0xd23a2c, 1).fillRect(x, 80, w * s.boss.hp / s.boss.maxHp, 14); this.bossName.setText(s.boss.name + (s.boss.anim === 'dead' ? ' · defeated' : '')); }
         else this.bossName.setText('');
         if (s.boss && s.boss.say) { this.bubble.setText(s.boss.say.text).setPosition(s.boss.x, s.boss.y - s.boss.h - 10).setVisible(true); } else this.bubble.setVisible(false);
-        // phases
-        this.title.setText(s.phase === 'lobby' ? `Room ${s.room} · waiting for players` : s.phase === 'results' ? 'Martino saved!' : '');
-        this.sub.setText(s.phase === 'story' && s.story ? s.story.text : s.phase === 'lobby' ? `${Object.keys(s.players).length} joined. Press Start on a phone (or Enter here).` : s.phase === 'results' && s.result ? `${s.result.time}s · ${s.result.deaths} deaths · MVP ${s.result.mvp}` : '');
+        // phases (lobby and results are drawn by the watch page's HTML overlay)
+        this.title.setText(s.phase === 'results' ? 'Martino saved!' : '');
+        this.sub.setText(s.phase === 'story' && s.story ? s.story.text : '');
         this.clock.setText(s.phase === 'fight' ? fmt(s.clock) : '');
         if (s.stunned) { g.fillStyle(0xffffff, 0.15); g.fillRect(0, 0, W, H); }
       }
@@ -63,7 +63,7 @@ window.SaveMartino = (function () {
   function drawPlayer(g, label, id, p, x, y) {
     const c = COLORS[p.char] || 0xcccccc, w = 48, h = 96;
     g.fillStyle(0x000000, 0.3); g.fillEllipse(x, y, 50, 14); // shadow on the ground
-    if (p.anim === 'down') { g.fillStyle(c, 0.5); g.fillRect(x - h / 2, y - 24, h, 24); label(id, `${p.name} ✕`, x, y - 30); return; }
+    if (p.anim === 'down') { g.fillStyle(c, 0.5); g.fillRect(x - h / 2, y - 24, h, 24); label(id, `${p.name} ✕ ${p.down || ''}`, x, y - 30); return; }
     const flash = p.anim === 'hurt' ? 0xffffff : c;
     g.fillStyle(flash, 1); g.fillRect(x - w / 2, y - h, w, h);
     g.fillStyle(0x000000, 0.4); g.fillRect(x + (p.facing > 0 ? 8 : -16), y - h + 18, 8, 8); // eye, shows facing
@@ -71,7 +71,8 @@ window.SaveMartino = (function () {
     label(id, `${p.name} ${'♥'.repeat(Math.max(0, p.hp))}`, x, y - h - 6);
   }
   function drawBoss(g, b, x, y) {
-    const w = b.w, h = b.h; const c = b.anim === 'hurt' ? 0xffffff : b.anim === 'dead' ? 0x666666 : (b.id === 'nonna' ? 0xd23a2c : b.id === 'peacock' ? 0x15797a : 0x4a2e22);
+    const w = b.w, h = b.h; const c = b.anim === 'hurt' ? 0xffffff : b.anim === 'dead' ? 0x666666 : b.anim === 'windup' ? 0xf2b84a : (b.id === 'nonna' ? 0xd23a2c : b.id === 'peacock' ? 0x15797a : 0x4a2e22);
+    if (b.anim === 'windup') x += (Math.random() - 0.5) * 10; // shakes before a charge: that's the cue to step out of its lane
     g.fillStyle(0x000000, 0.3); g.fillEllipse(x, y, w + 10, 18);
     g.fillStyle(c, 1); g.fillRect(x - w / 2, y - h, w, h);
     g.fillStyle(0xff3b2f, 1); g.fillRect(x + (b.facing > 0 ? w / 4 : -w / 4 - 12), y - h + 30, 12, 12);
