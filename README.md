@@ -1,6 +1,6 @@
 # Save Martino
 
-Co-op boss-rush for Via Falchi Game Night. Phones are controllers, each team watches its own laptop, the TV watches every room. Little Fighter 2 movement: eight directions on a ground plane.
+Co-op boss-rush for Via Falchi Game Night. Phones are controllers, each team watches its own laptop, the TV watches every room. Little Fighter 2 movement: eight directions on a ground plane. Teams of three.
 
 Plan and decisions: https://claude.ai/artifact/DSr6fncsYNN2vMTHdfPqZr
 
@@ -19,23 +19,36 @@ assets/     sprites and arenas (placeholders until the art lands)
 cd server && npm install && npm start        # http://localhost:3000
 ```
 
-The server also serves `web/`, so on the LAN you can skip Netlify: open `http://<laptop-ip>:3000/watch.html?room=bacaro` on a laptop and `http://<laptop-ip>:3000/phone.html?room=bacaro` on phones.
+The server also serves `web/`, so on the LAN you can skip Netlify: open `http://<laptop-ip>:3000/watch.html` on a laptop and `http://<laptop-ip>:3000/phone.html` on phones. Phones work on a laptop too: arrows/WASD move, space attacks, shift fires the special.
+
+## How a game goes
+
+1. A phone opens `phone.html`, picks a name and a character, and presses **Host a game**. It gets a 4-letter code.
+2. Teammates press **Join a game** and type the code, or scan the QR code on the team laptop. Three players per game.
+3. The team laptop opens `watch.html` and picks the game from the list (or types the code). It shows the arena, the code and the QR.
+4. Everyone presses **I'm ready**; the host presses **Start**. Enter on the watch page also starts the run, for the organiser.
+5. Story card → boss, three times. If the whole team is down at once, the boss comes back at its last checkpoint (full, or half once it reached phase 2).
+6. Results: time, deaths, wipes, MVP. The lobby comes back for another run.
+
+**Play solo** skips the lobby and starts at once, against a softer boss.
+
+The TV opens `watch.html?room=all`: one cell per live game, keys 1-9 to go full-screen on one, 0 back to the grid.
+
+## Balance
+
+Boss hp and attack patterns live in `server/game/bosses.js`. `cd server && npm run sim` plays a run with three scripted bots that never dodge and prints the time per boss, deaths and wipes; `npm run sim -- jin oriana` picks the team. Aim for 25-60 s per boss with bots: humans deal less damage and take about twice as long.
 
 ## Deploy (Netlify is the event's hosting)
 
-Netlify hosts static files and serverless functions only; it cannot hold a websocket open, so the game server runs on a laptop and the Netlify site talks to it.
+Netlify hosts static files only; it cannot hold a websocket open, so the game server runs on a laptop and the Netlify pages talk to it.
 
 1. Start the server on the TV laptop: `cd server && npm start`.
 2. Expose it over HTTPS (Netlify pages are HTTPS, so the socket must be `wss://`):
    `cloudflared tunnel --url http://localhost:3000` prints a `https://xxxx.trycloudflare.com` URL.
-3. Put that URL in `web/js/config.js` (`SERVER_URL`), commit, push. Netlify deploys `web/` (see `netlify.toml`).
-4. Phones open `https://<site>.netlify.app/phone.html?room=bacaro`, laptops `watch.html?room=bacaro`, TV `watch.html?room=all`.
+3. Open `https://<site>.netlify.app/?server=https://xxxx.trycloudflare.com` on the laptops and the TV. The pages carry the `server` parameter along, and the QR code on each watch page gives it to the phones. Nothing to commit when the tunnel URL changes.
+4. `SERVER_URL` in `web/js/config.js` is the fallback when the parameter is missing; leave it empty on the LAN.
 
 If the tunnel misbehaves, the LAN URLs above still work from the server itself.
-
-## Rooms
-
-One room per team, created on first join. Room names are the team slugs: `cicchetti`, `bacaro`, `acqua-alta`, `gondola`, `bigoli`. Any phone in the room can press Start; the watch page shows the QR for its room.
 
 ## Protocol
 

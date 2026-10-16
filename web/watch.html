@@ -9,44 +9,126 @@
   #game { width: 100%; height: 100%; display: grid; place-content: center; }
   #grid { display: grid; width: 100%; height: 100%; gap: 4px; grid-template-columns: repeat(3, 1fr); grid-auto-rows: 1fr; background: #0c1419; }
   #grid iframe { width: 100%; height: 100%; border: 0; background: #111a1f; }
-  #grid .label { position: absolute; }
-  .cell { position: relative; } .cell b { position: absolute; left: 8px; top: 6px; font-size: 14px; text-transform: capitalize; background: #0008; padding: 2px 8px; border-radius: 4px; }
+  .cell { position: relative; } .cell b { position: absolute; left: 8px; top: 6px; font-size: 14px; letter-spacing: 0.15em; background: #0008; padding: 2px 8px; border-radius: 4px; }
   #help { position: fixed; right: 10px; bottom: 8px; font-size: 12px; color: #9fb1b6; }
+  /* lobby / results overlay on top of the arena */
+  #overlay { position: fixed; inset: 0; display: none; place-content: center; text-align: center; pointer-events: none; }
+  #overlay.on { display: grid; }
+  #overlay .card { background: #111a1fd9; border: 1px solid #2e3e47; border-radius: 12px; padding: 28px 36px; display: grid; gap: 14px; justify-items: center; min-width: 320px; }
+  .hint { color: #9fb1b6; font-size: 0.95rem; max-width: 46ch; }
+  .bigcode { font-size: 4rem; font-weight: 900; letter-spacing: 0.3em; color: #d9a030; line-height: 1; padding-left: 0.3em; }
+  #ovQr svg, #ovQr img { display: block; background: #fff; border-radius: 8px; }
+  .url { font-family: monospace; font-size: 0.85rem; color: #9fb1b6; word-break: break-all; max-width: 44ch; }
+  ul.roster { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; width: 320px; }
+  ul.roster li { display: flex; justify-content: space-between; padding: 8px 12px; border-radius: 8px; background: #1a252c; border: 1px solid #2e3e47; }
+  ul.roster li.ready { border-color: #2e8b57; } ul.roster li small { color: #9fb1b6; } .tick { color: #2e8b57; font-weight: 900; }
+  .result { font-size: 1.4rem; font-weight: 800; }
+  body.mini #overlay .card { padding: 10px 14px; gap: 6px; min-width: 0; transform: scale(0.8); }
+  body.mini .bigcode { font-size: 2rem; } body.mini #ovQr, body.mini .url, body.mini .hint.long { display: none; } body.mini ul.roster { width: 200px; font-size: 0.8rem; }
+  /* room picker */
+  #picker { height: 100%; display: none; place-content: center; gap: 16px; text-align: center; padding: 24px; }
+  #picker.on { display: grid; }
+  #picker h1 { margin: 0; }
+  .rooms { display: grid; gap: 8px; width: min(90vw, 420px); }
+  .rooms button, #picker input { font: inherit; font-size: 1.1rem; padding: 12px; border-radius: 8px; border: 1px solid #2e3e47; background: #1a252c; color: inherit; width: 100%; cursor: pointer; text-align: left; }
+  .rooms button b { letter-spacing: 0.2em; margin-right: 12px; color: #d9a030; } .rooms button small { color: #9fb1b6; }
+  #pickCode { text-transform: uppercase; letter-spacing: 0.3em; text-align: center; font-weight: 700; }
 </style>
 </head>
 <body>
+<div id="picker">
+  <h1>Save Martino</h1>
+  <div class="hint">Which team is this screen for? Host a game on a phone first, then pick it here.</div>
+  <div class="rooms" id="pickRooms"><div class="hint">No game yet.</div></div>
+  <input id="pickCode" type="text" placeholder="or type the code" maxlength="4" autocapitalize="characters" spellcheck="false">
+  <div class="hint">TV: <a href="#" id="tvLink" style="color:#3db5b0">all rooms in a grid</a></div>
+</div>
 <div id="game"></div>
+<div id="overlay"><div class="card">
+  <div class="hint">Join with the code</div>
+  <div class="bigcode" id="ovCode"></div>
+  <div id="ovQr"></div>
+  <div class="url" id="ovUrl"></div>
+  <ul class="roster" id="ovRoster"></ul>
+  <div class="result" id="ovResult"></div>
+  <div class="hint long" id="ovMsg"></div>
+</div></div>
 <div id="help"></div>
 <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.80.1/phaser.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
 <script src="js/config.js"></script>
 <script src="js/renderer.js"></script>
 <script>
 (function () {
+  const $ = (id) => document.getElementById(id);
   const qs = new URLSearchParams(location.search);
-  const room = (qs.get('room') || 'bacaro').toLowerCase();
+  const room = (qs.get('room') || '').toUpperCase();
   const mini = qs.get('mini') === '1';
-  const base = window.SERVER_URL || location.origin;
+  const base = window.SERVER, sqs = window.SERVER_QS;
+  const pageUrl = (page, params) => location.origin + location.pathname.replace(/[^/]*$/, page) + '?' + params + sqs;
+  const socket = io(base, { transports: ['websocket', 'polling'] });
+  if (mini) document.body.classList.add('mini');
 
-  if (room === 'all') {
-    // TV grid: one small watch page per room, all live. Press a number key to go full-screen on one room, 0 to come back.
-    const grid = document.createElement('div'); grid.id = 'grid'; document.getElementById('game').replaceWith(grid);
-    const rooms = window.ROOMS;
-    rooms.forEach((r) => { const c = document.createElement('div'); c.className = 'cell'; c.innerHTML = `<iframe src="watch.html?room=${r}&mini=1"></iframe><b>${r}</b>`; grid.appendChild(c); });
-    document.getElementById('help').textContent = 'Keys 1-5: one room full-screen · 0: grid';
-    addEventListener('keydown', e => {
-      const n = +e.key;
-      if (n >= 1 && n <= rooms.length) location.href = `watch.html?room=${rooms[n - 1]}&back=all`;
+  // ---------- picker: no room in the URL ----------
+  if (!room) {
+    $('picker').classList.add('on'); $('game').style.display = 'none';
+    $('tvLink').href = pageUrl('watch.html', 'room=all');
+    socket.on('connect', () => socket.emit('watch', { room: 'all' }));
+    socket.on('rooms', list => {
+      const host = $('pickRooms');
+      host.innerHTML = list.length ? '' : '<div class="hint">No game yet.</div>';
+      for (const r of list) {
+        const b = document.createElement('button');
+        b.innerHTML = `<b>${r.code}</b>${r.players.map(p => p.name).join(', ') || '<small>empty</small>'} <small>· ${r.phase}</small>`;
+        b.addEventListener('click', () => { location.href = pageUrl('watch.html', 'room=' + r.code); });
+        host.appendChild(b);
+      }
     });
+    $('pickCode').addEventListener('keydown', e => { if (e.key === 'Enter' && $('pickCode').value.trim().length >= 4) location.href = pageUrl('watch.html', 'room=' + $('pickCode').value.trim().toUpperCase()); });
     return;
   }
 
-  const socket = io(base, { transports: ['websocket', 'polling'] });
+  // ---------- TV grid: every live room, one small watch page each ----------
+  if (room === 'ALL') {
+    const grid = document.createElement('div'); grid.id = 'grid'; $('game').replaceWith(grid);
+    let codes = [];
+    socket.on('connect', () => socket.emit('watch', { room: 'all' }));
+    socket.on('rooms', list => {
+      const next = list.map(r => r.code);
+      if (next.join() === codes.join()) return;
+      codes = next; grid.innerHTML = '';
+      if (!codes.length) { grid.innerHTML = `<div class="hint" style="place-self:center">No game yet. Phones: ${pageUrl('phone.html', '')}</div>`; return; }
+      grid.style.gridTemplateColumns = `repeat(${codes.length <= 1 ? 1 : codes.length <= 4 ? 2 : 3}, 1fr)`;
+      codes.forEach((c, i) => { const cell = document.createElement('div'); cell.className = 'cell'; cell.innerHTML = `<iframe src="${pageUrl('watch.html', 'room=' + c + '&mini=1')}"></iframe><b>${i + 1} · ${c}</b>`; grid.appendChild(cell); });
+    });
+    $('help').textContent = 'Keys 1-9: one room full-screen · 0: grid';
+    addEventListener('keydown', e => { const n = +e.key; if (n >= 1 && n <= codes.length) location.href = pageUrl('watch.html', 'room=' + codes[n - 1] + '&back=all'); });
+    return;
+  }
+
+  // ---------- one room ----------
   socket.on('connect', () => socket.emit('watch', { room }));
-  const game = SaveMartino.createRenderer(document.getElementById('game'), { room, mini, base, onStart: () => socket.emit('start') });
-  socket.on('state', s => game.push(s));
-  addEventListener('keydown', e => { if (e.key === '0' && qs.get('back') === 'all') location.href = 'watch.html?room=all'; if (e.key === 'Enter') socket.emit('start'); });
-  if (!mini) document.getElementById('help').textContent = 'Enter: start the run' + (qs.get('back') ? ' · 0: back to the grid' : '');
+  socket.on('fail', () => { location.href = pageUrl('watch.html', ''); }); // no such game: back to the picker
+  const game = SaveMartino.createRenderer($('game'), { room, mini, base, onStart: () => socket.emit('start') });
+  socket.on('state', s => { game.push(s); overlay(s); });
+  addEventListener('keydown', e => { if (e.key === '0' && qs.get('back') === 'all') location.href = pageUrl('watch.html', 'room=all'); if (e.key === 'Enter') socket.emit('start'); });
+  if (!mini) $('help').textContent = 'Enter: start the run' + (qs.get('back') ? ' · 0: back to the grid' : '');
+
+  const phoneUrl = pageUrl('phone.html', 'room=' + room);
+  let qrDone = false;
+  function overlay(s) {
+    const on = s.phase === 'lobby' || s.phase === 'results';
+    $('overlay').classList.toggle('on', on); if (!on) return;
+    $('ovCode').textContent = s.code;
+    if (!qrDone && !mini && window.qrcode) { qrDone = true; const qr = qrcode(0, 'M'); qr.addData(phoneUrl); qr.make(); $('ovQr').innerHTML = qr.createSvgTag({ cellSize: 5, margin: 2 }); $('ovUrl').textContent = phoneUrl; }
+    const ps = Object.entries(s.players);
+    $('ovRoster').innerHTML = ps.map(([id, p]) => `<li class="${p.ready ? 'ready' : ''}"><span>${p.name}${id === s.host ? ' <small>host</small>' : ''}</span><span><small>${p.char}</small> <span class="tick">${p.ready ? '✓' : ''}</span></span></li>`).join('') || '<li><small>Nobody yet. Scan the code with your phone.</small></li>';
+    $('ovResult').textContent = s.phase === 'results' && s.result ? `Martino saved in ${fmt(s.result.time)} · ${s.result.deaths} deaths · ${s.result.wipes} wipes · MVP ${s.result.mvp}` : '';
+    const waiting = ps.filter(([, p]) => !p.ready).length;
+    $('ovMsg').textContent = !ps.length ? '' : waiting ? `Waiting for ${waiting} to be ready` : 'Everyone is ready. The host starts the run from their phone.';
+  }
+  function fmt(sec) { const m = Math.floor(sec / 60), s = Math.floor(sec % 60); return `${m}:${String(s).padStart(2, '0')}`; }
 })();
 </script>
 </body>
