@@ -133,17 +133,19 @@ window.RMScreens = (function () {
       const scene = SCENES[sto.scene] || SCENES[SCENE_BY_ACT[sto.act]] || SCENES.prologue;
       // a card split into pages: the panels of earlier pages are already on screen and fully written, this page's lines are timed
       const off = sto.offset || 0;
-      refs.beats = scene(st, { ...sto, lines: sto.allLines || sto.lines }, s).map((b, i) => ({ ...b, shown: i < off, pre: i < off, idx: i - off }));
-      refs.beats.forEach(b => { if (b.pre) { b.panel.classList.add('on'); b.cap.classList.add('on'); b.cap.querySelectorAll('.c').forEach(c => c.classList.add('v')); } });
+      // beats before this page are shown at once but dimmed, this page's beats are timed, later pages' beats stay hidden
+      const count = (sto.lines || []).length || 1;
+      refs.beats = scene(st, { ...sto, lines: sto.allLines || sto.lines }, s).map((b, i) => ({ ...b, shown: i < off, pre: i < off, later: i >= off + count, idx: i - off }));
+      refs.beats.forEach(b => { if (b.pre) { b.panel.classList.add('on', 'done'); b.cap.classList.add('on', 'done'); b.cap.querySelectorAll('.c').forEach(c => c.classList.add('v')); } });
       refs.sto = sto; refs.base = { server: s.t, local: performance.now() };
     }
     function storyUpdate(s, fresh) {
       if (!refs.beats) return;
       if (fresh) refs.base = { server: s.t, local: performance.now() };
       const sto = refs.sto, now = (refs.base.server - sto.start) + (performance.now() - refs.base.local) / 1000;
-      const dur = sto.until - sto.start, n = Math.max(1, refs.beats.filter(b => !b.pre).length), step = Math.max(1.6, (dur - 3) / n);
+      const dur = sto.until - sto.start, n = Math.max(1, refs.beats.filter(b => !b.pre && !b.later).length), step = Math.max(1.6, (dur - 3) / n);
       refs.beats.forEach((b) => {
-        if (b.pre) return;
+        if (b.pre || b.later) return;
         const t0 = 0.4 + b.idx * step;
         if (now >= t0 && !b.shown) { b.shown = true; b.panel.classList.add('on'); b.cap.classList.add('on'); if (b.onShow) b.onShow(); }
         if (b.shown) { const cs = b.cap.querySelectorAll('.c'), vis = Math.floor((now - t0 - .25) / 0.028); cs.forEach((c, k) => c.classList.toggle('v', k < vis)); }

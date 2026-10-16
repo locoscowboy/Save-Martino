@@ -54,6 +54,7 @@
 .mg::before { content: ""; position: absolute; inset: 0; background: radial-gradient(#0002 1px, transparent 1.3px) 0 0 / 6px 6px; }
 .mg-panel { position: absolute; overflow: hidden; background: #fff center / cover no-repeat; border: 5px solid #111; box-shadow: 4px 5px 0 #111; opacity: 0; scale: .92; transition: opacity .35s, scale .5s cubic-bezier(.3,1.5,.5,1); }
 .mg-panel.on { opacity: 1; scale: 1; }
+.mg-panel.on.done { opacity: .4; filter: saturate(.4); } /* panels from an earlier page of the same card: present, but the new page stands out */
 .mg-panel::before { content: ""; position: absolute; inset: 0; z-index: 3; pointer-events: none; background: radial-gradient(#0003 1.1px, transparent 1.5px) 0 0 / 5px 5px; mix-blend-mode: multiply; }
 .mg-panel.speed::after { content: ""; position: absolute; inset: -40%; z-index: 2; pointer-events: none; background: repeating-conic-gradient(from 0deg at 50% 50%, #fff0 0 3deg, #ffffffaa 3deg 4deg, #fff0 4deg 9deg); animation: mg-spin 12s linear infinite; mask: radial-gradient(circle, transparent 28%, #000 60%); -webkit-mask: radial-gradient(circle, transparent 28%, #000 60%); }
 .mg-panel.dark { background-color: #222; }
@@ -63,6 +64,7 @@
 @keyframes mg-sfx { from { scale: 0; } }
 .mg-cap { position: absolute; z-index: 20; background: #fff; color: #111; border: 4px solid #111; box-shadow: 4px 4px 0 #111; font-family: var(--f-title); font-size: 25px; line-height: 1.15; padding: 9px 14px; max-width: 430px; opacity: 0; transition: opacity .3s; }
 .mg-cap.on { opacity: 1; }
+.mg-cap.on.done { opacity: .4; }
 .mg-cap .c { visibility: hidden; } .mg-cap .c.v { visibility: visible; }
 .mg-flash { position: absolute; inset: 0; z-index: 30; background: #fff; opacity: 0; pointer-events: none; }
 .mg-flash.go { animation: mg-flash .9s ease-out; }
