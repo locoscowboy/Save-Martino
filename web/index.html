@@ -4,26 +4,33 @@
 <meta charset="utf-8">
 <link rel="icon" href="data:,">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Save Martino</title>
-<style>
-  body { margin: 0; font-family: system-ui, sans-serif; background: #111a1f; color: #ecf1ee; padding: 24px; }
-  h1 { font-size: 2rem; margin: 0 0 8px; } p { color: #9fb1b6; max-width: 60ch; }
-  .links { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); margin-top: 20px; max-width: 760px; }
-  .link { background: #1a252c; border: 1px solid #2e3e47; border-radius: 6px; padding: 14px; display: grid; gap: 6px; }
-  a { color: #3db5b0; } .link b { font-size: 1.1rem; }
-</style>
+<title>Rescue Martino</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Silkscreen:wght@400;700&display=swap">
+<link rel="stylesheet" href="css/ui.css">
+<style>html, body { margin: 0; height: 100%; background: #1a1210; }</style>
 </head>
 <body>
-<h1>Save Martino</h1>
-<p>Co-op boss rush. One phone per player, one laptop per team, the TV watches every team.</p>
-<div class="links">
-  <div class="link"><b>Phone</b><span>Host a game and share the 4-letter code, or join with a code.</span><a id="phone" href="phone.html">Open the controller</a></div>
-  <div class="link"><b>Team laptop</b><span>Shows the arena, the code and a QR code for teammates.</span><a id="watch" href="watch.html">Open the watch page</a></div>
-  <div class="link"><b>TV</b><span>Every live game in a grid.</span><a id="tv" href="watch.html?room=all">Open the grid</a></div>
-</div>
+<main class="mp" id="page">
+  <div class="mp-title"><span class="r">RESCUE</span><span class="m">MARTINO</span><span class="tag">VIA FALCHI GAME NIGHT · CO-OP BOSS RUSH</span></div>
+  <div class="mp-cards">
+    <section class="mp-card"><div class="mp-art" data-fig="jin attack .5"></div><div class="mp-k">01 · EVERY PLAYER</div><h2 class="mp-h">Phone</h2><p class="mp-p">Your controller. Host a game and share the 4-letter code, or join your team with it.</p><a class="mp-btn" id="phone" href="phone.html">OPEN THE CONTROLLER</a></section>
+    <section class="mp-card"><div class="mp-art" data-fig="euge front .42"></div><div class="mp-k">02 · ONE PER TEAM</div><h2 class="mp-h">Team laptop</h2><p class="mp-p">Your team's screen: the arena, the story and the results, with a QR code for teammates.</p><a class="mp-btn gold" id="watch" href="watch.html">OPEN THE WATCH PAGE</a></section>
+    <section class="mp-card"><div class="mp-art" data-fig="martino tino .36"></div><div class="mp-k">03 · THE BIG SCREEN</div><h2 class="mp-h">TV</h2><p class="mp-p">Every live game side by side, so the whole room can cheer.</p><a class="mp-btn dark" id="tv" href="watch.html?room=all">OPEN THE GRID</a></section>
+  </div>
+  <div class="mp-foot">ONE PHONE PER PLAYER · ONE LAPTOP PER TEAM · THREE PLAYERS A TEAM</div>
+</main>
 <script src="js/config.js"></script>
+<script src="js/ui.js"></script>
 <script>
   if (window.SERVER_QS) for (const id of ['phone', 'watch', 'tv']) { const a = document.getElementById(id); a.href += (a.href.includes('?') ? '' : '?') + window.SERVER_QS; }
+  document.getElementById('page').style.backgroundImage = `url(${RM.base}/assets/arenas/farm.jpg)`;
+  // a character on each card, breathing
+  document.querySelectorAll('[data-fig]').forEach((art, i) => {
+    const [id, pose, k] = art.dataset.fig.split(' ');
+    const sh = document.createElement('div'); sh.className = 'rm-shadow'; art.appendChild(sh);
+    const f = RM.frame(id, pose, +k, { cls: 'rm-breathe' }); f.style.setProperty('--bd', -i * .8 + 's'); art.appendChild(f);
+  });
 </script>
 </body>
 </html>

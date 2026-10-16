@@ -28,7 +28,9 @@ const BOSS_ROWS = [['idle', 'walk1', 'walk2', 'attack'], ['throw', 'special', 'h
 // idle: target height of the idle frame in the atlas (2.5× the in-game size, crisp on a 1080p TV). facing: which way row 2 looks.
 const SHEETS = [
   ...['euge', 'quentin', 'jin', 'oriana'].map(id => ({ id, file: `characters/${id}_sheet.png`, rows: CHAR_ROWS, idle: 240, facing: 1, portraits: ['front'] })),
-  { id: 'carlos', file: 'characters/carlos_sheet.png', rows: CHAR_ROWS, idle: 240, facing: 1, portraits: ['front'], holes: { threequarter: [[0.74, 0.65]] } },
+  { id: 'carlos', file: 'characters/carlos_sheet.png', rows: CHAR_ROWS, idle: 240, facing: 1, portraits: ['front'], holes: {
+    front: [[0.607, 0.539], [0.239, 0.529], [0.180, 0.710]], threequarter: [[0.74, 0.65], [0.202, 0.532]], back: [[0.391, 0.540], [0.762, 0.534]],
+    idle: [[0.613, 0.561], [0.229, 0.509]], special: [[0.486, 0.679], [0.681, 0.774]] } },
   { id: 'bricciola', file: 'characters/bricciola_sheet.png', rows: [['front', 'threequarter', 'side', 'side2', 'back'], CHAR_ROWS[1]], idle: 240, facing: -1, portraits: ['front'] },
   // the generated boss sheets look left at rest and right for most actions: frameFacing says which pose looks which way
   { id: 'nonna', file: 'bosses/nonna_sheet.png', rows: BOSS_ROWS, idle: 375, facing: -1, frameFacing: { attack: 1, throw: 1, special: 1, hurt: 1, defeated: 1 } },
@@ -138,8 +140,8 @@ function crop(img, label, f, holes = [], what = '') {
     if (x > 0) stack.push(i - 1); if (x < w - 1) stack.push(i + 1); if (y > 0) stack.push(i - w); if (y < h - 1) stack.push(i + w); }
   if (process.env.HOLES) { // diagnostic: enclosed near-white regions (a white apron, or background the fill could not reach)
     const seen = new Uint8Array(w * h);
-    for (let i = 0; i < w * h; i++) { if (bg[i] || seen[i] || !isBg(i)) continue; const st = [i]; seen[i] = 1; let n = 0, sum = 0; while (st.length) { const p = st.pop(); n++; sum += Math.min(px[p * 4], px[p * 4 + 1], px[p * 4 + 2]); const x = p % w, y = (p - x) / w; for (const q of [p - 1, p + 1, p - w, p + w]) { const qx = q % w; if (q < 0 || q >= w * h || Math.abs(qx - x) > 1 || seen[q] || bg[q] || !isBg(q)) continue; seen[q] = 1; st.push(q); } }
-      if (n >= 150) console.log(`      hole ${n} px, mean ${(sum / n).toFixed(1)}`); }
+    for (let i = 0; i < w * h; i++) { if (bg[i] || seen[i] || !isBg(i)) continue; const st = [i]; seen[i] = 1; let n = 0, sum = 0, bx0 = w, by0 = h, bx1 = 0, by1 = 0; while (st.length) { const p = st.pop(); n++; sum += Math.min(px[p * 4], px[p * 4 + 1], px[p * 4 + 2]); const x = p % w, y = (p - x) / w; bx0 = Math.min(bx0, x); bx1 = Math.max(bx1, x); by0 = Math.min(by0, y); by1 = Math.max(by1, y); for (const q of [p - 1, p + 1, p - w, p + w]) { const qx = q % w; if (q < 0 || q >= w * h || Math.abs(qx - x) > 1 || seen[q] || bg[q] || !isBg(q)) continue; seen[q] = 1; st.push(q); } }
+      if (n >= 150) console.log(`      hole ${n} px, mean ${(sum / n).toFixed(1)}, seed [${((i % w) / w).toFixed(3)}, ${(Math.floor(i / w) / h).toFixed(3)}], box x ${(bx0 / w).toFixed(2)}-${(bx1 / w).toFixed(2)} y ${(by0 / h).toFixed(2)}-${(by1 / h).toFixed(2)}`); }
   }
   for (let i = 0; i < w * h; i++) {
     if (bg[i]) { px[i * 4 + 3] = 0; continue; }
