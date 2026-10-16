@@ -44,7 +44,7 @@ check(Object.values(st.players).every(p => p.ready), 'everyone ready, start allo
 host.emit('start');
 st = await until(watch, s => s.phase === 'story');
 check(st.story && st.story.text.length > 0, 'run starts with the first story card');
-st = await until(watch, s => s.phase === 'fight');
+st = await until(watch, s => s.phase === 'fight', 25000);
 check(st.boss && st.boss.id === 'nonna' && st.boss.maxHp === 2000, `fight begins against ${st.boss.name} at full-team hp`);
 
 // walk right and mash attack for a while: the boss should lose hp

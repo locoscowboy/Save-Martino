@@ -1,23 +1,93 @@
 {
-  "premise": "Martino is Tino's full name, the farm's little dog. Someone at the retreat put prototype AI glasses on him. The glasses took over and Martino ran off, and the longer they run the more of a monster he becomes. Beat him, the glasses fall off, and he is Tino again. Tone: Italian telenovela. No cutscenes, just story cards and speech bubbles.",
+  "premise": "Martino is Tino's full name, the farm's little dog. Someone at the retreat put prototype AI glasses on him. The glasses took over and Martino ran off, and the longer they run the more of a monster he becomes. Beat him, the glasses fall off, and he is Tino again. Tone: Italian telenovela. Manga-style story cards between the fights (arena art, the bosses' poses, lines revealed one by one) and speech bubbles in the fights.",
   "story": [
-    { "seconds": 7, "text": "Martino is the farm's little dog. Someone put AI glasses on him. The glasses took over and he ran away. Nonna saw it all, and she is angry." },
-    { "seconds": 7, "text": "Martino's tracks go into the hazelnut woods. Something big is walking between the trees, and it hates the little camera on the glasses." },
-    { "seconds": 7, "text": "Venice. The glasses have been running on Martino's head too long. That huge thing barking at pigeons is still him. Probably." },
-    { "seconds": 8, "text": "The glasses crack and fall off. Martino shrinks, shakes himself, and licks the nearest ankle. Martino saved." }
+    {
+      "seconds": 14,
+      "scene": "prologue",
+      "lines": [
+        "Via Falchi. Tino the chihuahua is everyone's favourite.",
+        "Then someone put prototype AI glasses on him.",
+        "The glasses took over. Tino became Monster Martino and ran off.",
+        "Nonna saw it all. Get past her first!"
+      ],
+      "text": "Via Falchi. Tino the chihuahua is everyone's favourite. Then someone put prototype AI glasses on him. The glasses took over. Tino became Monster Martino and ran off. Nonna saw it all. Get past her first!"
+    },
+    {
+      "seconds": 9,
+      "scene": "woods",
+      "lines": [
+        "Martino's tracks lead into the hazelnut woods.",
+        "The Peacock blocks the path. He wants an audience.",
+        "Beat him to follow the trail!"
+      ],
+      "text": "Martino's tracks lead into the hazelnut woods. The Peacock blocks the path. He wants an audience. Beat him to follow the trail!"
+    },
+    {
+      "seconds": 9,
+      "scene": "venice",
+      "lines": [
+        "Venice. The glasses have been on too long.",
+        "That giant barking at pigeons is Martino.",
+        "Break the glasses. Save Tino!"
+      ],
+      "text": "Venice. The glasses have been on too long. That giant barking at pigeons is Martino. Break the glasses. Save Tino!"
+    },
+    {
+      "seconds": 14,
+      "scene": "ending",
+      "lines": [
+        "The glasses crack and fall off.",
+        "Martino shrinks back into little Tino.",
+        "Back at the villa, everyone celebrates. Tino is saved!"
+      ],
+      "text": "The glasses crack and fall off. Martino shrinks back into little Tino. Back at the villa, everyone celebrates. Tino is saved!"
+    }
   ],
-  "retry": "Everyone is down. {boss} is still standing. Try again.",
+  "retry": "Everyone is down. {boss} is still standing. Try again!",
   "bosses": {
-    "nonna":   { "intro": "Nobody leaves my kitchen hungry!", "half": "That's all you can eat?", "wipe": "Too skinny, all of you. Again!", "defeat": "Fine. Go find him." },
-    "peacock": { "intro": "Finally. An audience.", "half": "Look at me!", "wipe": "Was that all?", "defeat": "Oh right. Tino went to Venice." },
-    "martino": { "intro": "GRRR...", "half": "WOOF WOOF!", "wipe": "GRRR... again.", "defeat": "yip!" }
+    "nonna": {
+      "intro": "Nobody leaves my kitchen hungry!",
+      "half": "That's all you can eat?",
+      "wipe": "Too skinny, all of you. Again!",
+      "defeat": "Fine. Go find him."
+    },
+    "peacock": {
+      "intro": "Finally. An audience.",
+      "half": "Look at me!",
+      "wipe": "Was that all?",
+      "defeat": "Oh right. Tino went to Venice."
+    },
+    "martino": {
+      "intro": "GRRR...",
+      "half": "WOOF WOOF!",
+      "wipe": "GRRR... again.",
+      "defeat": "yip!"
+    }
   },
   "cast": {
-    "euge":      { "join": "Nobody panics on my farm. Except the dog.", "down": "Not in front of the guests!" },
-    "quentin":   { "join": "Hold my baguette.", "down": "Sacrebleu." },
-    "jin":       { "join": "恭喜发财", "down": "My rice!" },
-    "oriana":    { "join": "Breathe in...... (wait 1s), then, breath out", "down": "I was so calm." },
-    "carlos":    { "join": "Picanha can't wait", "down": "My picanha!" },
-    "bricciola": { "join": "Meow!", "down": "Meow....." }
+    "euge": {
+      "join": "Nobody panics on my farm. Except the dog.",
+      "down": "Not in front of the guests!"
+    },
+    "quentin": {
+      "join": "Hold my baguette.",
+      "down": "Sacrebleu."
+    },
+    "jin": {
+      "join": "恭喜发财",
+      "down": "My rice!"
+    },
+    "oriana": {
+      "join": "Breathe in...... (wait 1s), then, breath out",
+      "down": "I was so calm."
+    },
+    "carlos": {
+      "join": "Picanha can't wait",
+      "down": "My picanha!"
+    },
+    "bricciola": {
+      "join": "Meow!",
+      "down": "Meow....."
+    }
   }
 }

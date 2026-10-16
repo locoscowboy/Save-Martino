@@ -15,9 +15,11 @@ window.SaveMartino = (function () {
   // a boss attack shows the pose of the pattern that fired (state.boss.move); a windup telegraphs with another pose
   const BOSS_MOVES = { nonna: { pizza: 'throw', plates: 'throw', bolognese: 'special' }, peacock: { feather: 'throw', screech: 'special' }, martino: { howl: 'special' } };
   const WINDUP = { nonna: 'attack', peacock: 'special', martino: 'hero' };
+  const FONT = '"Lilita One", system-ui, sans-serif';
 
   function createRenderer(parent, opts) {
     let latest = null, prev = null, prevAt = 0, latestAt = 0;
+    const fxq = []; // game-feel events found between two snapshots, played by the scene on its next frame
     const base = opts.base || '';
     const sfx = createSfx(opts.sfx, !!opts.sound);
     const music = createMusic(opts.music, !!opts.sound, base);
@@ -32,6 +34,8 @@ window.SaveMartino = (function () {
         this.arena = this.add.image(W / 2, H / 2, '__DEFAULT').setDisplaySize(W, H).setVisible(false).setDepth(0);
         this.ground = this.add.graphics().setDepth(1); // shadows and the grill's heat, under everyone
         this.sprites = new Map(); this.labels = new Map(); this.dirs = new Map();
+        this.fx = new Map(); this.bfx = { flashUntil: 0, kx: 0, ghost: 1 }; this.rings = new Map(); this.lastPuff = new Map();
+        this.hud = this.add.graphics().setDepth(9001);
         const g = this.make.graphics({ add: false }); g.fillStyle(0xffffff, 1); g.fillCircle(16, 16, 16); g.generateTexture('dot', 32, 32); g.destroy();
         // no pigeon on any sheet: a small one drawn here, facing right
         const pg = this.make.graphics({ add: false });
@@ -45,7 +49,7 @@ window.SaveMartino = (function () {
         this.title = ui(this.add.text(W / 2, 40, '', { fontFamily: 'system-ui', fontSize: '28px', fontStyle: 'bold', color: '#ecf1ee', stroke: '#000', strokeThickness: 4 }).setOrigin(0.5));
         this.sub = ui(this.add.text(W / 2, H / 2, '', { fontFamily: 'system-ui', fontSize: '22px', color: '#ecf1ee', backgroundColor: '#0c1419cc', padding: { x: 18, y: 12 }, wordWrap: { width: 720 }, align: 'center' }).setOrigin(0.5));
         this.bossBar = ui(this.add.graphics());
-        this.bossName = ui(this.add.text(W / 2, 70, '', { fontFamily: 'system-ui', fontSize: '16px', color: '#ecf1ee', stroke: '#000', strokeThickness: 3 }).setOrigin(0.5));
+        this.bossName = ui(this.add.text(W / 2, 62, '', { fontFamily: FONT, fontSize: '22px', color: '#fff1d6', stroke: '#2a0e08', strokeThickness: 6 }).setOrigin(0.5));
         this.clock = ui(this.add.text(W - 16, 12, '', { fontFamily: 'monospace', fontSize: '16px', color: '#ecf1ee', stroke: '#000', strokeThickness: 3 }).setOrigin(1, 0));
         this.bubble = ui(this.add.text(0, 0, '', { fontFamily: 'system-ui', fontSize: '16px', color: '#1a0d0b', backgroundColor: '#f7f7f2', padding: { x: 8, y: 4 }, wordWrap: { width: 260 } }).setOrigin(0.5, 1).setVisible(false));
         this.flash = ui(this.add.rectangle(W / 2, H / 2, W, H, 0xffffff, 0.15).setVisible(false));
@@ -58,7 +62,25 @@ window.SaveMartino = (function () {
         // interpolate between the two latest snapshots for smooth motion at 20 Hz
         const span = Math.max(1, latestAt - prevAt); const k = prev ? Math.min(1, (now - latestAt) / span) : 1;
         const lerp = (a, b) => a + (b - a) * k;
-        const g = this.ground; g.clear(); this.bossBar.clear();
+        const g = this.ground; g.clear(); this.bossBar.clear(); this.hud.clear();
+        // game feel: hit flashes, damage numbers, shakes and squash, from the events push() found between snapshots
+        while (fxq.length) {
+          const e = fxq.shift(), f = (id) => { let v = this.fx.get(id); if (!v) { v = { flashUntil: 0, squashUntil: 0 }; this.fx.set(id, v); } return v; };
+          if (e.t === 'boss' && s.boss) {
+            this.bfx.flashUntil = now + 90; this.bfx.kx = 9;
+            const sp = this.sprites.get('boss'), top = sp ? sp.getBounds().top : s.boss.y - s.boss.h;
+            const n = this.add.text(s.boss.x + (Math.random() - 0.5) * 40, top + 20, String(e.dmg), { fontFamily: FONT, fontSize: e.dmg >= 18 ? '34px' : '26px', color: '#f4b63b', stroke: '#2a0e08', strokeThickness: 6 }).setOrigin(0.5).setDepth(9500);
+            this.tweens.add({ targets: n, y: n.y - 60, alpha: 0, scale: { from: 1.4, to: 1 }, duration: 750, ease: 'Cubic.Out', onComplete: () => n.destroy() });
+            const ring = this.add.circle(s.boss.x - s.boss.facing * 20, s.boss.y - s.boss.h * 0.55, 10).setStrokeStyle(4, 0xffffff).setDepth(9400);
+            this.tweens.add({ targets: ring, scale: 4, alpha: 0, duration: 260, onComplete: () => ring.destroy() });
+            if (e.dmg >= 18) this.cameras.main.shake(110, 0.004);
+          }
+          if (e.t === 'hurt') { f(e.id).flashUntil = now + 110; this.cameras.main.shake(130, 0.006); }
+          if (e.t === 'squash') f(e.id).squashUntil = now + 110;
+          if (e.t === 'shake') this.cameras.main.shake(250, 0.008);
+          if (e.t === 'back') { const p = s.players[e.id]; if (p) { const r = this.add.circle(p.x, p.y - 48, 20).setStrokeStyle(5, 0x4fa35a).setDepth(9400); this.tweens.add({ targets: r, scale: 3, alpha: 0, duration: 450, onComplete: () => r.destroy() }); } }
+        }
+        const puff = (x, y) => { const c = this.add.ellipse(x, y, 16, 8, 0xf0e6d2, 0.7).setDepth(y - 1); this.tweens.add({ targets: c, scale: 2.4, alpha: 0, x: x + (Math.random() - 0.5) * 20, y: y - 6, duration: 380, onComplete: () => c.destroy() }); };
         const arenaKey = s.boss ? s.boss.arena : 'farm';
         if (this.textures.exists('arena-' + arenaKey)) this.arena.setTexture('arena-' + arenaKey).setDisplaySize(W, H).setVisible(true); else this.arena.setVisible(false);
         const live = new Set(), liveLabels = new Set();
@@ -66,7 +88,7 @@ window.SaveMartino = (function () {
 
         const label = (id, text, x, y) => {
           let t = this.labels.get(id);
-          if (!t) { t = this.add.text(0, 0, '', { fontFamily: 'system-ui', fontSize: '13px', color: '#ecf1ee', backgroundColor: '#0008', padding: { x: 4, y: 2 } }).setOrigin(0.5, 1); this.labels.set(id, t); }
+          if (!t) { t = this.add.text(0, 0, '', { fontFamily: FONT, fontSize: '14px', color: '#fff1d6', stroke: '#2a0e08', strokeThickness: 4 }).setOrigin(0.5, 1); this.labels.set(id, t); }
           t.setText(text).setPosition(x, y).setDepth(9000).setVisible(true); liveLabels.add(id);
         };
         // one sprite per character or boss: frame from its atlas, feet on (x, y), flipped when it faces away from the pose
@@ -100,10 +122,34 @@ window.SaveMartino = (function () {
           g.fillStyle(0x000000, 0.3); g.fillEllipse(x, y, 50, 14);
           const down = p.anim === 'down';
           const frame = down ? 'hurt' : p.anim === 'walk' ? walk : p.anim;
-          const sp = place('p:' + id, p.char, frame, x, y, p.facing, PLAYER_H, down ? { angle: p.facing > 0 ? -80 : 80, alpha: 0.9 } : {});
+          const sp = place('p:' + id, p.char, frame, x, y, p.facing, PLAYER_H, down ? { angle: p.facing > 0 ? -80 : 80, alpha: 0.55 } : {});
           if (!sp) drawBox(g, COLORS[p.char] || 0xcccccc, x, y, 48, PLAYER_H, p.facing, p.anim);
+          const fx = this.fx.get(id);
+          if (sp && !down) { // squash on a swing, breathing at rest, a bob and dust while walking, white when hit
+            const k = sp.scaleY, ph = id.length + id.charCodeAt(0);
+            if (fx && now < fx.squashUntil) sp.setScale(k * 1.13, k * 0.9);
+            else if (p.anim === 'idle') sp.setScale(k * (1 + Math.sin(now / 420 + ph) * 0.006), k * (1 + Math.sin(now / 420 + ph) * 0.016));
+            if (p.anim === 'walk') { sp.y -= Math.abs(Math.sin(now / 160 * Math.PI)) * 3; if (now - (this.lastPuff.get(id) || 0) > 220) { this.lastPuff.set(id, now); puff(x - p.facing * 12, y); } }
+            if (fx && now < fx.flashUntil) sp.setTintFill(0xffffff);
+          }
           const top = sp ? sp.getBounds().top : y - PLAYER_H;
-          label('p:' + id, down ? `${p.name} ✕ ${p.down || ''}` : `${p.name} ${'♥'.repeat(Math.max(0, p.hp))}`, x, Math.min(top, y - 24) - 6);
+          const ly = down ? y - 70 : Math.min(top, y - 24) - 12;
+          label('p:' + id, down ? p.name : `${p.name} ${'♥'.repeat(Math.max(0, p.hp))}`, x, ly);
+          if (down) { // respawn countdown: a ring that fills up and the seconds left, so nobody thinks they are out
+            const left = p.downT || p.down || 0, max = s.respawn || 5, frac = 1 - Math.min(1, left / max), cy = y - 40;
+            this.hud.fillStyle(0x13151b, 0.75).fillCircle(x, cy, 25);
+            this.hud.lineStyle(6, 0x4fa35a, 1).beginPath().arc(x, cy, 25, -Math.PI / 2, -Math.PI / 2 + frac * Math.PI * 2).strokePath();
+            let t = this.rings.get(id); if (!t) { t = this.add.text(0, 0, '', { fontFamily: FONT, fontSize: '26px', color: '#fff1d6', stroke: '#2a0e08', strokeThickness: 5, align: 'center' }).setOrigin(0.5).setDepth(9600); this.rings.set(id, t); }
+            t.setText(String(Math.max(1, Math.ceil(left)))).setPosition(x, cy).setVisible(true); liveLabels.add('ring:' + id);
+            label('pb:' + id, 'BACK IN', x, cy - 28);
+          } else {
+            const t = this.rings.get(id); if (t) t.setVisible(false);
+            // special charge under the name: fills while it recharges, gold and pulsing once SP is ready
+            const max = p.cdMax || 10, frac = p.cd > 0 ? 1 - p.cd / max : 1, bw = 46, bx = x - bw / 2, by = ly + 3;
+            this.hud.fillStyle(0x13151b, 0.8).fillRect(bx - 2, by - 2, bw + 4, 9);
+            if (frac >= 1) { this.hud.fillStyle(0xf4b63b, 0.75 + Math.sin(now / 120) * 0.25).fillRect(bx, by, bw, 5); }
+            else this.hud.fillStyle(0x3db5b0, 1).fillRect(bx, by, bw * frac, 5);
+          }
         }
 
         if (s.boss) {
@@ -113,10 +159,17 @@ window.SaveMartino = (function () {
           const frame = b.anim === 'dead' ? 'defeated' : b.anim === 'windup' ? (WINDUP[b.id] || 'idle') : b.anim === 'intro' ? 'hero'
             : b.anim === 'attack' ? (moves[b.move] || 'attack') : b.anim === 'walk' ? walk : b.anim;
           const windup = b.anim === 'windup';
-          const sp = place('boss', b.id, frame, x, y, b.facing, b.h, { dx: windup ? (Math.random() - 0.5) * 10 : 0, tint: windup ? 0xffd080 : 0 });
+          this.bfx.kx *= 0.82;
+          const sp = place('boss', b.id, frame, x, y, b.facing, b.h, { dx: (windup ? (Math.random() - 0.5) * 10 : 0) - b.facing * this.bfx.kx, tint: windup ? 0xffd080 : 0 });
+          if (sp && now < this.bfx.flashUntil) sp.setTintFill(0xffffff);
+          else if (sp && b.anim === 'idle') { const k = sp.scaleY; sp.setScale(k, k * (1 + Math.sin(now / 520) * 0.014)); }
           if (!sp) drawBox(g, COLORS[b.id] || 0x4a2e22, x, y, b.w, b.h, b.facing, b.anim);
-          const w = 520, bx = (W - w) / 2;
-          this.bossBar.fillStyle(0x000000, 0.6).fillRect(bx, 80, w, 14); this.bossBar.fillStyle(b.phase === 2 ? 0xf05a4c : 0xd23a2c, 1).fillRect(bx, 80, w * b.hp / b.maxHp, 14);
+          const w = 520, bx = (W - w) / 2, frac = b.hp / b.maxHp;
+          this.bfx.ghost = Math.max(frac, this.bfx.ghost - 0.004); if (this.bfx.ghost < frac || (pb && pb.id !== b.id)) this.bfx.ghost = frac;
+          this.bossBar.fillStyle(0x2a0e08, 1).fillRoundedRect(bx - 4, 76, w + 8, 22, 6);
+          this.bossBar.fillStyle(0xffffff, 0.45).fillRect(bx, 80, w * this.bfx.ghost, 14);
+          this.bossBar.fillStyle(b.phase === 2 ? 0xff7a5c : 0xe2452f, 1).fillRect(bx, 80, w * frac, 14);
+          this.bossBar.fillStyle(0xffffff, 0.25).fillRect(bx, 80, w * frac, 4);
           this.bossName.setText(b.name + (b.anim === 'dead' ? ' · defeated' : ''));
           const top = sp ? sp.getBounds().top : y - b.h;
           if (b.say) this.bubble.setText(b.say.text).setPosition(x, top - 10).setVisible(true); else this.bubble.setVisible(false);
@@ -139,19 +192,31 @@ window.SaveMartino = (function () {
           if (!sp) prop(id, 'dot', null, x, y - 40 - h, pr.kind === 'bolognese' ? 28 : 20, { tint: PROJ[pr.kind] || PROJ.default, depth: y });
         }
 
-        if (s.phase === 'results') place('tino', 'martino', 'tino', W / 2, 440, 1, 70);
         for (const [id, sp] of this.sprites) if (!live.has(id)) { sp.destroy(); this.sprites.delete(id); }
         for (const [id, t] of this.labels) if (!liveLabels.has(id)) t.setVisible(false);
+        for (const [id, t] of this.rings) if (!liveLabels.has('ring:' + id)) t.setVisible(false);
 
         // phases (lobby and results details are drawn by the watch page's HTML overlay)
-        this.title.setText(s.phase === 'results' ? 'Martino saved!' : '');
-        this.sub.setText(s.phase === 'story' && s.story ? s.story.text : '').setVisible(s.phase === 'story' && !!s.story);
+        // the title, story cards and results are HTML screens on top (web/js/screens.js)
+        this.title.setText(''); this.sub.setVisible(false);
         this.clock.setText(s.phase === 'fight' ? fmt(s.clock) : '');
         this.flash.setVisible(!!s.stunned);
       }
     };
     const game = new Phaser.Game({ type: Phaser.AUTO, parent, width: W, height: H, backgroundColor: '#1a252c', scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH }, loader: { crossOrigin: 'anonymous' }, scene });
-    return { push(s) { prev = latest; prevAt = latestAt; latest = s; latestAt = performance.now(); sfx.diff(prev, s); music.sync(prev, s); }, game };
+    const feel = (a, b) => {
+      if (!a || !b || b.phase !== 'fight' || a.phase !== 'fight') return;
+      if (a.boss && b.boss && a.boss.id === b.boss.id && b.boss.hp < a.boss.hp) fxq.push({ t: 'boss', dmg: a.boss.hp - b.boss.hp });
+      if (a.boss && b.boss && b.boss.anim === 'attack' && (a.boss.anim !== 'attack' || a.boss.move !== b.boss.move) && (b.boss.move === 'howl' || b.boss.move === 'screech' || b.boss.move === 'plates')) fxq.push({ t: 'shake' });
+      for (const [id, p] of Object.entries(b.players)) {
+        const q = a.players[id]; if (!q) continue;
+        if (p.hp < q.hp && q.anim !== 'down') fxq.push({ t: 'hurt', id });
+        if (p.anim !== q.anim && (p.anim === 'attack' || p.anim === 'special')) fxq.push({ t: 'squash', id });
+        if (q.anim === 'down' && p.anim !== 'down') fxq.push({ t: 'back', id });
+      }
+      if (fxq.length > 40) fxq.splice(0, fxq.length - 40);
+    };
+    return { push(s) { prev = latest; prevAt = latestAt; latest = s; latestAt = performance.now(); sfx.diff(prev, s); music.sync(prev, s); feel(prev, s); }, game };
   }
 
   // Sound: plays the clip for every change between two snapshots (an attack frame, a landed hit, a phase change), the way
@@ -207,7 +272,7 @@ window.SaveMartino = (function () {
     };
   }
 
-  // Music: one track per phase from content/music.json (menu in the lobby, one per fight, results once), loaded when it is
+  // Music: one track per phase from content/music.json (menu in the lobby, one per fight, results once from the ending card on), loaded when it is
   // first needed so the page never fetches all five at once: the fight track loads during the story card before it.
   // Looped when the manifest says so, faded out on a phase change, kept through a wipe's retry card, quiet under the effects.
   function createMusic(manifest, enabled, base) {
@@ -231,6 +296,7 @@ window.SaveMartino = (function () {
         if (!enabled || !scene || !b) return;
         const act = Math.min(b.act, FIGHT.length - 1);
         if (b.phase === 'lobby') { wanted = 'menu_select'; ensure('menu_select'); ensure(FIGHT[0]); }
+        else if (b.phase === 'story' && b.story && b.story.kind === 'ending') { wanted = 'results'; ensure('results'); } // the happy ending runs into the results track
         else if (b.phase === 'story') { ensure(FIGHT[act]); if (!(a && a.phase === 'fight' && b.wipes > a.wipes) && !(a && a.phase === 'story')) wanted = null; }
         else if (b.phase === 'fight') { wanted = FIGHT[act]; ensure(wanted); ensure(act < FIGHT.length - 1 ? FIGHT[act + 1] : 'results'); }
         else if (b.phase === 'results') { if (!a || a.phase !== 'results') wanted = 'results'; ensure('results'); }

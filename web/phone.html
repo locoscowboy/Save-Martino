@@ -5,70 +5,135 @@
 <link rel="icon" href="data:,">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="mobile-web-app-capable" content="yes">
-<title>Save Martino · controller</title>
+<title>Rescue Martino · controller</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Silkscreen:wght@400;700&display=swap">
+<link rel="stylesheet" href="css/ui.css">
 <style>
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-  html, body { margin: 0; height: 100%; overflow: hidden; background: #111a1f; color: #ecf1ee; font-family: system-ui, sans-serif; touch-action: none; overscroll-behavior: none; user-select: none; -webkit-user-select: none; }
-  .screen { height: 100%; display: none; place-content: center; gap: 14px; padding: 20px; text-align: center; overflow-y: auto; touch-action: pan-y; }
-  .screen.on { display: grid; }
-  h1 { margin: 0; font-size: 1.8rem; }
-  input, button { font: inherit; font-size: 1.1rem; padding: 12px; border-radius: 8px; border: 1px solid #2e3e47; background: #1a252c; color: inherit; width: min(80vw, 320px); margin: 0 auto; }
-  button { font-weight: 700; } button:disabled { opacity: 0.4; }
-  button.primary { background: #d23a2c; border-color: #d23a2c; } button.ok { background: #2e8b57; border-color: #2e8b57; } button.gold { background: #d9a030; border-color: #d9a030; color: #1a0d0b; }
-  .chars { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; width: min(90vw, 420px); margin: 0 auto; }
-  .char { padding: 8px 10px; border-radius: 8px; border: 2px solid #2e3e47; background: #1a252c; cursor: pointer; display: grid; grid-template-columns: 40px 1fr; gap: 8px; align-items: center; text-align: left; }
-  .char.sel { border-color: #3db5b0; } .char b { font-size: 1rem; } .char small { color: #9fb1b6; font-size: 0.75rem; }
-  .char img { height: 56px; width: 40px; object-fit: contain; object-position: bottom; } .char div { display: grid; gap: 2px; }
-  .modes { display: grid; gap: 8px; }
-  #joinBox { display: grid; gap: 8px; } #joinBox[hidden] { display: none; }
-  #code { text-transform: uppercase; letter-spacing: 0.3em; text-align: center; font-weight: 700; }
-  .err { color: #f05a4c; min-height: 1.2em; font-size: 0.95rem; }
-  .bigcode { font-size: 3rem; font-weight: 900; letter-spacing: 0.25em; color: #d9a030; line-height: 1; }
-  .hint { color: #9fb1b6; font-size: 0.9rem; max-width: 40ch; margin: 0 auto; }
-  ul.roster { list-style: none; margin: 0 auto; padding: 0; display: grid; gap: 6px; width: min(80vw, 320px); }
-  ul.roster li { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; border-radius: 8px; background: #1a252c; border: 1px solid #2e3e47; }
-  ul.roster li.ready { border-color: #2e8b57; } ul.roster li small { color: #9fb1b6; } ul.roster li .tick { color: #2e8b57; font-weight: 900; }
-  #pad { position: relative; padding: 0; }
-  #hud { position: absolute; top: 10px; left: 0; right: 0; display: flex; justify-content: space-between; padding: 0 16px; font-weight: 700; }
-  #hud .hearts { color: #f05a4c; letter-spacing: 2px; }
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #1a1210; color: var(--cream); font-family: system-ui, sans-serif; touch-action: none; overscroll-behavior: none; user-select: none; -webkit-user-select: none; }
+  .screen { height: 100%; display: none; overflow-y: auto; touch-action: pan-y; }
+  .screen.on { display: block; }
+  .col { max-width: 430px; margin: 0 auto; display: grid; gap: 8px; padding: 0 0 20px; }
+  .head { display: grid; justify-items: center; padding: 16px 12px 8px; background: linear-gradient(180deg, #2a1610, #1a1210); }
+  .logo { font-family: var(--f-title); font-size: 32px; color: var(--cream); -webkit-text-stroke: 6px var(--outline); paint-order: stroke fill; text-shadow: 0 4px 0 var(--tomato); letter-spacing: .03em; }
+  .sub { font-family: var(--f-pixel); font-size: 12px; color: var(--gold); letter-spacing: .2em; margin-top: 4px; }
+  .lbl { font-family: var(--f-pixel); font-size: 11px; letter-spacing: .14em; color: var(--muted); padding: 4px 22px 0; }
+  .field { margin: 0 16px; font-family: var(--f-title); font-size: 24px; color: var(--cream); background: #2c201b; border: 3px solid #4a3328; border-radius: 10px; padding: 8px 14px; width: calc(100% - 32px); }
+  .field:focus { outline: none; border-color: var(--gold); }
+  .tiles { position: relative; display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 0 16px 4px; }
+  .tiles span { aspect-ratio: 1 / 1.1; display: grid; place-items: center; font-family: var(--f-title); font-size: 44px; color: var(--cream); background: #2c201b; border: 3px solid #4a3328; border-radius: 12px; box-shadow: 0 5px 0 #0c0806; -webkit-text-stroke: 6px var(--outline); paint-order: stroke fill; }
+  .tiles span.cur { border-color: var(--gold); }
+  .tiles span.cur:empty::after { content: ""; width: 4px; height: 40px; background: var(--gold); animation: rm-blink 1s steps(2) infinite; }
+  .tiles span.pop { animation: tilepop .3s cubic-bezier(.3,1.8,.5,1); }
+  @keyframes tilepop { from { scale: .6; background: var(--tomato); } }
+  .tiles.bad { animation: shake .3s linear; }
+  @keyframes shake { 20% { translate: -8px 0; } 40% { translate: 7px 0; } 60% { translate: -5px 0; } 80% { translate: 3px 0; } }
+  .tiles input { position: absolute; inset: 0; opacity: 0; font-size: 16px; width: 100%; }
+  .go { margin: 0 16px; font-family: var(--f-title); font-size: 28px; letter-spacing: .04em; color: #fff; background: var(--tomato); border: 4px solid var(--outline); box-shadow: 0 6px 0 var(--outline); border-radius: 12px; padding: 10px; cursor: pointer; width: calc(100% - 32px); }
+  .go:active { translate: 0 4px; box-shadow: 0 2px 0 var(--outline); }
+  .go.ok { background: var(--basil); } .go.gold { background: var(--gold); color: var(--outline); } .go:disabled { opacity: .45; }
+  .or { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 10px; margin: 4px 22px; font-family: var(--f-pixel); font-size: 11px; color: var(--muted); }
+  .or::before, .or::after { content: ""; height: 1px; background: #4a3328; }
+  .alt { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 0 16px; }
+  .alt button { font-family: var(--f-pixel); font-size: 12px; letter-spacing: .06em; background: #2c201b; color: var(--cream); border: 2px solid #4a3328; border-radius: 8px; padding: 12px 6px; }
+  .err { color: #ff8a73; min-height: 1.2em; font-size: .95rem; text-align: center; padding: 0 16px; }
+  .hint { color: var(--muted); font-size: 12px; text-align: center; max-width: 34ch; margin: 0 auto; }
+  /* fighter select */
+  .stage { position: relative; height: 290px; overflow: hidden; background: #6a9c50 46% 88% / 900px auto no-repeat; touch-action: pan-y; }
+  .stage::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(255,170,90,.15), transparent 50%, rgba(26,18,16,.7)); pointer-events: none; }
+  .stage .rm-fig { left: 50%; top: 254px; z-index: 2; }
+  .stage .rm-shadow { left: 50%; top: 254px; width: 150px; height: 30px; }
+  .fig.drop .rm-frame { animation: drop .5s cubic-bezier(.3,1.6,.5,1); }
+  @keyframes drop { from { translate: 0 -120px; opacity: 0; } 60% { opacity: 1; } }
+  .arrow { position: absolute; top: 45%; z-index: 4; font-size: 20px; color: #fff; background: rgba(20,12,8,.6); border-radius: 50%; width: 44px; height: 44px; display: grid; place-items: center; border: 0; }
+  .arrow.l { left: 10px; } .arrow.r { right: 10px; }
+  .stamp { position: absolute; left: 50%; top: 40%; z-index: 5; font-family: var(--f-title); font-size: 68px; color: var(--gold); -webkit-text-stroke: 10px var(--outline); paint-order: stroke fill; transform: translate(-50%,-50%) rotate(-10deg) scale(0); pointer-events: none; }
+  .stamp.on { animation: stamp .45s cubic-bezier(.3,1.8,.5,1) forwards; }
+  @keyframes stamp { to { transform: translate(-50%,-50%) rotate(-10deg) scale(1); } }
+  .teamcode { position: absolute; left: 10px; top: 10px; z-index: 4; font-family: var(--f-pixel); font-size: 11px; background: rgba(20,12,8,.7); padding: 4px 8px; border-radius: 6px; letter-spacing: .1em; }
+  .teamcode b { font-family: var(--f-title); font-size: 18px; color: var(--gold); letter-spacing: .12em; margin-left: 4px; }
+  .info { display: grid; gap: 5px; justify-items: center; text-align: center; margin-top: -26px; position: relative; z-index: 3; padding: 0 16px; }
+  .cname { font-family: var(--f-title); font-size: 50px; line-height: 1; color: var(--cream); -webkit-text-stroke: 8px var(--outline); paint-order: stroke fill; text-shadow: 0 5px 0 var(--tomato); }
+  .cname.pop { animation: namepop .35s cubic-bezier(.3,1.7,.5,1); }
+  @keyframes namepop { from { scale: .6; } }
+  .clabel { color: var(--muted); font-size: 14px; }
+  .chips { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+  .chip { font-family: var(--f-pixel); font-size: 11px; letter-spacing: .06em; padding: 3px 9px; border-radius: 99px; background: #2c201b; color: var(--cream); border: 1px solid #4a3328; }
+  .chip.sp { background: var(--tomato); border-color: var(--tomato); color: #fff; }
+  .desc { font-size: 13px; opacity: .85; min-height: 36px; max-width: 32ch; margin: 0; }
+  .roster { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; padding: 4px 12px; }
+  .tile { position: relative; aspect-ratio: 1; border-radius: 10px; background: #2c201b; border: 3px solid #4a3328; overflow: hidden; padding: 0; }
+  .tile img { position: absolute; left: 50%; top: 4%; width: 150%; max-width: none; transform: translateX(-50%); pointer-events: none; }
+  .tile.sel { border-color: var(--gold); box-shadow: 0 0 0 2px var(--gold), 0 0 14px rgba(244,182,59,.6); animation: tilebob 1s ease-in-out infinite; }
+  @keyframes tilebob { 50% { translate: 0 -3px; } }
+  .tile .badge { position: absolute; left: 0; right: 0; bottom: 0; font-family: var(--f-pixel); font-size: 8px; background: rgba(0,0,0,.75); color: #fff; padding: 1px 0; text-align: center; overflow: hidden; white-space: nowrap; }
+  .team { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; padding: 0 12px; }
+  .team span { font-family: var(--f-title); font-size: 15px; padding: 2px 10px; border-radius: 8px; background: #2c201b; border: 2px solid #4a3328; }
+  .team span.ready { border-color: var(--basil); color: #bff0c6; }
+  .team small { font-family: var(--f-pixel); font-size: 9px; color: var(--muted); margin-left: 4px; }
+  .result { font-family: var(--f-title); font-size: 18px; color: var(--gold); text-align: center; padding: 0 16px; }
+  /* pad */
+  #pad { position: relative; overflow: hidden; background: #13151b; }
+  #pad.on { display: block; }
+  #hud { position: absolute; top: 10px; left: 0; right: 0; display: flex; justify-content: space-between; padding: 0 16px; font-family: var(--f-title); font-size: 20px; }
+  #hud .hearts { color: #ff6b57; letter-spacing: 2px; }
   #stick { position: absolute; left: 6vw; bottom: 10vh; width: 42vw; max-width: 260px; aspect-ratio: 1; border-radius: 50%; background: rgba(255,255,255,0.06); border: 2px solid rgba(255,255,255,0.15); }
   #knob { position: absolute; left: 50%; top: 50%; width: 38%; aspect-ratio: 1; border-radius: 50%; background: rgba(255,255,255,0.25); transform: translate(-50%, -50%); }
-  .btn { position: absolute; width: 22vw; max-width: 130px; aspect-ratio: 1; border-radius: 50%; display: grid; place-content: center; font-weight: 900; font-size: 1.2rem; border: 3px solid; }
+  .btn { position: absolute; width: 22vw; max-width: 130px; aspect-ratio: 1; border-radius: 50%; display: grid; place-content: center; font-family: var(--f-title); font-size: 1.4rem; border: 4px solid; }
   .btn:active, .btn.on { filter: brightness(1.4); }
-  #atk { right: 24vw; bottom: 8vh; background: #d23a2c33; border-color: #d23a2c; }
-  #spc { right: 4vw; bottom: 22vh; background: #3db5b033; border-color: #3db5b0; }
-  #spc.cd { opacity: 0.35; }
-  #msg { position: absolute; left: 0; right: 0; top: 40%; text-align: center; color: #9fb1b6; font-size: 0.95rem; padding: 0 16px; }
-  #rot { display: none; position: fixed; inset: 0; background: #111a1f; place-content: center; text-align: center; z-index: 5; }
+  #atk { right: 24vw; bottom: 8vh; background: #e2452f33; border-color: var(--tomato); }
+  #spc { right: 4vw; bottom: 22vh; border-color: var(--gold); background: conic-gradient(#f4b63b88 var(--p, 100%), #0006 0); }
+  #spc.ready { animation: sp-ready .7s ease-in-out infinite; color: var(--gold); }
+  @keyframes sp-ready { 50% { box-shadow: 0 0 0 8px #f4b63b55, 0 0 24px #f4b63b; } }
+  #spc.cd { color: #fff8; border-color: #f4b63b66; }
+  #msg { position: absolute; left: 0; right: 0; top: 18%; text-align: center; font-family: var(--f-title); font-size: 1.3rem; padding: 0 22vw; line-height: 1.25; text-shadow: 0 2px 0 #000; }
+  #down { position: absolute; inset: 0; display: none; place-content: center; text-align: center; background: rgba(10,6,4,.6); pointer-events: none; }
+  #down.on { display: grid; }
+  #down .ring { width: 120px; height: 120px; border-radius: 50%; margin: 0 auto; display: grid; place-content: center; background: conic-gradient(var(--basil) var(--p, 0%), #ffffff22 0); }
+  #down .ring b { width: 96px; height: 96px; border-radius: 50%; background: #1a1210; display: grid; place-content: center; font-family: var(--f-title); font-size: 52px; }
+  #down .t { font-family: var(--f-title); font-size: 26px; margin-top: 10px; } #down small { font-family: var(--f-pixel); font-size: 11px; color: var(--muted); letter-spacing: .12em; }
+  #rot { display: none; position: fixed; inset: 0; background: #1a1210; place-content: center; text-align: center; z-index: 5; font-family: var(--f-title); font-size: 24px; }
   @media (orientation: portrait) { #pad.live ~ #rot { display: grid; } }
 </style>
 </head>
 <body>
-<div id="join" class="screen on">
-  <h1>Save Martino</h1>
-  <input id="name" type="text" placeholder="Your name" maxlength="16" autocomplete="off">
-  <div class="chars" id="chars"></div>
-  <div class="modes">
-    <button id="solo" type="button">Play solo</button>
-    <button id="hostBtn" type="button" class="primary">Host a game</button>
-    <button id="joinBtn" type="button">Join a game</button>
-  </div>
-  <div id="joinBox" hidden>
-    <input id="code" type="text" placeholder="CODE" maxlength="4" autocomplete="off" autocapitalize="characters" spellcheck="false">
-    <button id="go" type="button" class="primary">Join</button>
-  </div>
+<div id="join" class="screen on"><div class="col">
+  <div class="head"><span class="logo">RESCUE MARTINO</span><span class="sub">JOIN YOUR TEAM</span></div>
+  <label class="lbl" for="name">YOUR NAME</label>
+  <input id="name" class="field" type="text" placeholder="Your name" maxlength="16" autocomplete="off">
+  <label class="lbl" for="code">GAME CODE ON THE LAPTOP</label>
+  <div class="tiles" id="tiles"><span></span><span></span><span></span><span></span>
+    <input id="code" type="text" maxlength="4" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Game code"></div>
+  <button id="go" type="button" class="go">JOIN</button>
   <div id="joinErr" class="err"></div>
-</div>
+  <div class="or"><span>OR</span></div>
+  <div class="alt"><button id="hostBtn" type="button">HOST A GAME</button><button id="solo" type="button">PLAY SOLO</button></div>
+  <p class="hint">Scanned the QR code on the laptop? The code is already filled in.</p>
+</div></div>
 
-<div id="lobby" class="screen">
-  <div class="hint">Your team's code</div>
-  <div class="bigcode" id="lobbyCode"></div>
-  <div class="hint" id="lobbyHint"></div>
-  <ul class="roster" id="roster"></ul>
-  <button id="readyBtn" type="button" class="ok">I'm ready</button>
-  <button id="startBtn" type="button" class="gold" hidden>Start the run</button>
+<div id="lobby" class="screen"><div class="col">
+  <div class="head"><span class="logo">RESCUE MARTINO</span><span class="sub" id="lobbySub">PICK YOUR FIGHTER</span></div>
+  <div class="stage" id="stage">
+    <div class="teamcode" id="teamcode" hidden>CODE<b id="lobbyCode"></b></div>
+    <div class="rm-shadow"></div>
+    <button class="arrow l" id="prev" type="button" aria-label="Previous character">◀</button>
+    <button class="arrow r" id="next" type="button" aria-label="Next character">▶</button>
+    <div class="stamp" id="stamp">READY!</div>
+  </div>
+  <div class="info">
+    <div class="cname" id="cname"></div>
+    <div class="clabel" id="clabel"></div>
+    <div class="chips"><span class="chip" id="crole"></span><span class="chip sp" id="csp"></span></div>
+    <p class="desc" id="cdesc"></p>
+  </div>
+  <div class="roster" id="chars"></div>
+  <div class="result" id="result"></div>
+  <div class="team" id="roster"></div>
+  <button id="readyBtn" type="button" class="go">LOCK IN</button>
+  <button id="startBtn" type="button" class="go gold" hidden>START THE RUN</button>
   <div id="lobbyMsg" class="hint"></div>
-</div>
+</div></div>
 
 <div id="pad" class="screen">
   <div id="hud"><span id="who"></span><span class="hearts" id="hearts"></span></div>
@@ -76,33 +141,52 @@
   <div id="stick"><div id="knob"></div></div>
   <div id="atk" class="btn">ATK</div>
   <div id="spc" class="btn">SP</div>
+  <div id="down"><div class="ring" id="downRing"><b id="downN">5</b></div><div class="t">You're down</div><small>BACK IN THE FIGHT WHEN THE RING FILLS</small></div>
 </div>
 <div id="rot"><div>Turn your phone sideways</div></div>
 
 <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
 <script src="js/config.js"></script>
+<script src="js/ui.js"></script>
 <script>
 (function () {
   const $ = (id) => document.getElementById(id);
   const qs = new URLSearchParams(location.search);
   const base = window.SERVER;
-  let roster = [], char = null, socket = null, myId = null, code = null, name = 'Player', pending = null;
+  let roster = [], char = null, socket = null, myId = null, code = null, name = 'Player', pending = null, solo = false;
   // menu blip; a tap is the user gesture the browser wants before any sound
   const blipAudio = new Audio(base + '/assets/sfx/ui_select.mp3'); blipAudio.volume = 0.6;
   const blip = () => { try { blipAudio.currentTime = 0; blipAudio.play().catch(() => {}); } catch (e) {} };
+  $('stage').style.backgroundImage = `url(${base}/assets/arenas/farm.jpg)`;
 
+  const ROLE = { slam: 'Crowd hitter', burst: 'Ranged', dash: 'Dasher', heal: 'Healer', zone: 'Zone', charm: 'Charm' };
+  const SCALE = { bricciola: .55 }, SPECIAL_SCALE = { bricciola: .48, oriana: .8 };
+  let cur = 0, fig = null, loopT = 0;
   fetch(base + '/content/roster.json').then(r => r.json()).then(list => {
-    roster = list; const host = $('chars');
-    list.filter(c => !c.backup).forEach((c, i) => { // backup characters wait until their mechanic exists on the server
-      const d = document.createElement('div'); d.className = 'char' + (i === 0 ? ' sel' : ''); if (i === 0) char = c.id;
-      d.innerHTML = `<img src="${base}/assets/sprites/${c.id}_front.png" alt=""><div><b>${c.name}</b><small>${c.label || ''}</small><small>${c.special.split(':')[0]}</small></div>`;
-      d.addEventListener('click', () => { document.querySelectorAll('.char').forEach(x => x.classList.remove('sel')); d.classList.add('sel'); char = c.id; blip(); });
-      host.appendChild(d);
+    roster = list.filter(c => !c.backup); // backup characters wait until their mechanic exists on the server
+    let saved = null; try { saved = localStorage.getItem('sm-char'); } catch (e) {}
+    cur = Math.max(0, roster.findIndex(c => c.id === saved)); char = roster[cur].id;
+    roster.forEach((c, i) => {
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'tile'; b.setAttribute('aria-label', c.name);
+      b.innerHTML = `<img src="${base}/assets/sprites/${c.id}_front.png" alt=""><span class="badge" hidden></span>`;
+      b.addEventListener('click', () => pick(i, i > cur ? 1 : -1));
+      $('chars').appendChild(b);
     });
+    showChar();
   }).catch(() => { $('joinErr').textContent = 'Cannot reach the game server.'; });
 
   try { const n = localStorage.getItem('sm-name'); if (n) $('name').value = n; } catch (e) {}
-  if (qs.get('room')) { $('code').value = qs.get('room').toUpperCase(); $('joinBox').hidden = false; }
+
+  // ---------- code tiles ----------
+  const tiles = [...document.querySelectorAll('#tiles span')];
+  function renderCode(popAt) {
+    const v = $('code').value.toUpperCase().replace(/[^A-Z]/g, '').slice(0, 4); $('code').value = v;
+    tiles.forEach((t, i) => { t.textContent = v[i] || ''; t.classList.toggle('cur', i === v.length); if (i === popAt) { t.classList.remove('pop'); void t.offsetWidth; t.classList.add('pop'); } });
+  }
+  $('code').addEventListener('input', () => renderCode($('code').value.length - 1));
+  $('code').addEventListener('keydown', e => { if (e.key === 'Enter') $('go').click(); });
+  if (qs.get('room')) $('code').value = qs.get('room'); renderCode(-1);
+  const bad = (msg) => { $('joinErr').textContent = msg; const t = $('tiles'); t.classList.remove('bad'); void t.offsetWidth; t.classList.add('bad'); };
 
   function show(id) { document.querySelectorAll('.screen').forEach(s => s.classList.toggle('on', s.id === id)); $('pad').classList.toggle('live', id === 'pad'); }
 
@@ -116,23 +200,60 @@
     if (socket) return;
     socket = io(base, { transports: ['websocket', 'polling'] });
     socket.on('connect', () => { if (code) socket.emit('join', { room: code, name, char }); else if (pending) { pending(); pending = null; } });
-    socket.on('joined', ({ id, room }) => { myId = id; code = room; $('lobbyCode').textContent = room; });
-    socket.on('fail', ({ message }) => { $('joinErr').textContent = message; code = null; myId = null; show('join'); });
+    socket.on('joined', ({ id, room }) => { myId = id; code = room; solo = false; $('lobbyCode').textContent = room; $('teamcode').hidden = false; });
+    socket.on('fail', ({ message, reason }) => { code = null; myId = null; show('join'); bad(reason === 'nocode' ? 'No game with that code. Check the laptop.' : message); });
     socket.on('state', onState);
     socket.on('hit', () => { try { navigator.vibrate && navigator.vibrate(80); } catch (e) {} });
     socket.on('connect_error', () => { $('joinErr').textContent = 'Cannot connect to the game server.'; });
     socket.on('disconnect', () => { $('msg').textContent = 'Connection lost, reconnecting…'; $('lobbyMsg').textContent = 'Connection lost, reconnecting…'; });
   }
-  $('solo').addEventListener('click', () => connect(() => socket.emit('solo', { name, char })));
-  $('hostBtn').addEventListener('click', () => connect(() => socket.emit('host', { name, char })));
-  $('joinBtn').addEventListener('click', () => { $('joinBox').hidden = false; $('code').focus(); });
   $('go').addEventListener('click', () => {
     const c = $('code').value.trim().toUpperCase();
-    if (c.length < 4) { $('joinErr').textContent = 'Enter the 4-letter code.'; return; }
-    connect(() => socket.emit('join', { room: c, name, char }));
+    if (c.length < 4) { bad('Type the 4-letter code from the laptop.'); return; }
+    blip(); connect(() => socket.emit('join', { room: c, name, char }));
   });
-  $('code').addEventListener('keydown', e => { if (e.key === 'Enter') $('go').click(); });
-  $('readyBtn').addEventListener('click', () => { if (socket && lastMe) socket.emit('ready', { ready: !lastMe.ready }); blip(); });
+  $('hostBtn').addEventListener('click', () => { blip(); connect(() => socket.emit('host', { name, char })); });
+  // solo: pick first, then Lock in starts the run
+  $('solo').addEventListener('click', () => { blip(); solo = true; name = $('name').value.trim() || 'Player'; lastMe = null; renderPick(null); show('lobby'); });
+
+  // ---------- fighter select ----------
+  function setPose(f) { const c = roster[cur]; if (!c || !fig) return; const k = (f === 'special' ? SPECIAL_SCALE[c.id] : 0) || SCALE[c.id] || .85; if (fig.dataset.frame !== f || fig.dataset.c !== c.id) { fig.dataset.c = c.id; fig.setFrame(f, k); } }
+  function showChar(dir = 0) {
+    const c = roster[cur]; if (!c) return;
+    char = c.id; try { localStorage.setItem('sm-char', char); } catch (e) {}
+    $('cname').textContent = c.name; $('clabel').textContent = c.label || '';
+    $('crole').textContent = ROLE[c.mechanic] || 'Fighter';
+    const [sp, ...rest] = (c.special || '').split(':'); $('csp').textContent = 'SPECIAL · ' + sp.trim(); $('cdesc').textContent = rest.join(':').trim();
+    const nm = $('cname'); nm.classList.remove('pop'); void nm.offsetWidth; nm.classList.add('pop');
+    document.querySelectorAll('#chars .tile').forEach((t, k) => t.classList.toggle('sel', k === cur));
+    if (fig) fig.remove();
+    fig = RM.frame(c.id, 'idle', SCALE[c.id] || .85, { cls: 'fig drop' }); fig.dataset.c = c.id; $('stage').appendChild(fig);
+    loopT = performance.now();
+    if (socket && myId && !locked()) socket.emit('char', { char });
+  }
+  const locked = () => !!(lastMe && lastMe.ready);
+  function pick(i, dir) { if (locked() || !roster.length) return; cur = (i + roster.length) % roster.length; blip(); showChar(dir); }
+  $('prev').addEventListener('click', () => pick(cur - 1, -1));
+  $('next').addEventListener('click', () => pick(cur + 1, 1));
+  let sx = null;
+  $('stage').addEventListener('pointerdown', e => { sx = e.clientX; });
+  $('stage').addEventListener('pointerup', e => { if (sx !== null && Math.abs(e.clientX - sx) > 40) pick(cur + (e.clientX < sx ? 1 : -1), e.clientX < sx ? 1 : -1); sx = null; });
+  // the stage acts out the character: idle, walk, attack, idle, special
+  const SEQ = [['idle', 900], ['walk1', 160], ['walk2', 160], ['walk1', 160], ['walk2', 160], ['attack', 450], ['idle', 900], ['special', 1100]];
+  const SEQ_LEN = SEQ.reduce((a, s) => a + s[1], 0);
+  (function loop(now) {
+    if (fig && $('lobby').classList.contains('on')) {
+      if (locked()) setPose('special');
+      else { let t = Math.max(0, now - loopT) % SEQ_LEN, f = 'idle'; for (const [fr, d] of SEQ) { if (t < d) { f = fr; break; } t -= d; } setPose(f); }
+    }
+    requestAnimationFrame(loop);
+  })(0);
+
+  $('readyBtn').addEventListener('click', () => {
+    blip();
+    if (solo && !myId) { connect(() => socket.emit('solo', { name, char })); return; }
+    if (socket && lastMe) { if (!lastMe.ready) socket.emit('char', { char }); socket.emit('ready', { ready: !lastMe.ready }); }
+  });
   $('startBtn').addEventListener('click', () => { if (socket) socket.emit('start'); blip(); });
 
   // ---------- input ----------
@@ -168,29 +289,46 @@
   function onState(s) {
     const me = s.players[myId]; if (!me) return;
     lastMe = me;
-    if (s.phase === 'lobby' || s.phase === 'results') { renderLobby(s, me); show('lobby'); }
+    if (s.phase === 'lobby' || s.phase === 'results') { renderPick(s); show('lobby'); }
     else { renderPad(s, me); show('pad'); }
   }
-  function renderLobby(s, me) {
-    const ps = Object.entries(s.players), isHost = s.host === myId;
-    $('lobbyHint').textContent = ps.length < s.maxPlayers ? `Teammates join with this code · ${ps.length}/${s.maxPlayers} in` : 'Team complete';
-    $('roster').innerHTML = ps.map(([id, p]) => `<li class="${p.ready ? 'ready' : ''}"><span>${p.name}${id === s.host ? ' <small>host</small>' : ''}</span><span><small>${charName(p.char)}</small> <span class="tick">${p.ready ? '✓' : ''}</span></span></li>`).join('');
-    $('readyBtn').textContent = me.ready ? 'Ready ✓ (tap to undo)' : "I'm ready";
-    $('readyBtn').classList.toggle('ok', !me.ready);
-    $('startBtn').hidden = !isHost; $('startBtn').disabled = !s.canStart;
+  function renderPick(s) {
+    const me = s && s.players[myId], ps = s ? Object.entries(s.players) : [], isHost = s && s.host === myId;
+    if (me && me.char !== char && me.ready) { const i = roster.findIndex(c => c.id === me.char); if (i >= 0 && i !== cur) { cur = i; showChar(); } }
+    // teammates' picks on the portraits
+    const taken = {}; for (const [id, p] of ps) if (id !== myId) (taken[p.char] = taken[p.char] || []).push(p.name);
+    document.querySelectorAll('#chars .tile').forEach((t, k) => { const b = t.querySelector('.badge'), who = taken[roster[k].id]; b.hidden = !who; if (who) b.textContent = who.join(', ').toUpperCase(); });
+    $('roster').innerHTML = ps.map(([id, p]) => `<span class="${p.ready ? 'ready' : ''}">${RM.esc(p.name)}${p.ready ? ' ✓' : ''}<small>${[charName(p.char).toLowerCase() === p.name.trim().toLowerCase() ? '' : RM.esc(charName(p.char)), id === s.host ? 'HOST' : ''].filter(Boolean).join(' · ')}</small></span>`).join('');
+    const ready = !!(me && me.ready);
+    $('stamp').classList.toggle('on', ready);
+    $('readyBtn').textContent = solo && !me ? 'START SOLO' : ready ? 'READY ✓' : 'LOCK IN';
+    $('readyBtn').classList.toggle('ok', ready);
+    $('startBtn').hidden = !isHost; $('startBtn').disabled = !(s && s.canStart);
+    $('prev').hidden = $('next').hidden = ready;
+    const res = s && s.phase === 'results' && s.result;
+    $('lobbySub').textContent = res ? 'TINO IS SAVED · ANOTHER RUN?' : 'PICK YOUR FIGHTER';
+    $('result').textContent = res ? `Saved in ${RM.fmt(res.time)} · ${res.deaths} downs · MVP ${res.mvp}` : '';
+    if (!s) { $('lobbyMsg').textContent = 'Solo: pick a fighter and start.'; return; }
     const waiting = ps.filter(([, p]) => !p.ready).length;
     const hostName = (s.players[s.host] || {}).name || 'the host';
-    $('lobbyMsg').textContent = s.phase === 'results' && s.result
-      ? `Martino saved in ${s.result.time}s · ${s.result.deaths} deaths · ${s.result.wipes} wipes · MVP ${s.result.mvp}. Ready for another run?`
-      : waiting ? `Waiting for ${waiting} player${waiting > 1 ? 's' : ''} to be ready` : isHost ? 'Everyone is ready. Start when you like.' : `Everyone is ready. ${hostName} starts the run.`;
+    $('lobbyMsg').textContent = (ready ? 'Tap READY again to change fighter. ' : '') + (waiting ? `Teammates join with code ${s.code} · waiting for ${waiting} to lock in` : isHost ? 'Everyone is ready. Start when you like.' : `Everyone is ready. ${hostName} starts the run.`);
   }
   function renderPad(s, me) {
     $('who').textContent = me.name;
     $('hearts').textContent = '♥'.repeat(Math.max(0, me.hp)) + '♡'.repeat(Math.max(0, (s.maxHp || 5) - me.hp));
-    const spc = $('spc'); spc.classList.toggle('cd', me.cd > 0); spc.textContent = me.cd > 0 ? Math.ceil(me.cd) : 'SP';
+    const spc = $('spc'), max = me.cdMax || 10, frac = me.cd > 0 ? 1 - me.cd / max : 1;
+    spc.style.setProperty('--p', Math.round(frac * 100) + '%');
+    spc.classList.toggle('cd', me.cd > 0); spc.classList.toggle('ready', !(me.cd > 0)); spc.textContent = me.cd > 0 ? Math.ceil(me.cd) : 'SP!';
+    const down = s.phase === 'fight' && me.anim === 'down';
+    $('down').classList.toggle('on', down);
+    if (down) { const left = me.downT || me.down || 0; $('downN').textContent = Math.max(1, Math.ceil(left)); $('downRing').style.setProperty('--p', Math.round((1 - left / (s.respawn || 5)) * 100) + '%'); }
     const msg = $('msg');
-    if (s.phase === 'story') msg.textContent = s.story ? s.story.text : '';
-    else if (s.phase === 'fight') msg.textContent = me.anim === 'down' ? `Down. Back in ${me.down}…` : (s.boss ? `${s.boss.name}: ${s.boss.hp}/${s.boss.maxHp}` : '');
+    if (s.phase === 'story' && s.story) {
+      const lines = s.story.lines || [s.story.text], dur = s.story.until - s.story.start, step = Math.max(1.6, (dur - 3) / lines.length);
+      const i = Math.max(0, Math.min(lines.length - 1, Math.floor((s.t - s.story.start - 0.4) / step)));
+      msg.textContent = lines[i] || '';
+    }
+    else if (s.phase === 'fight') msg.textContent = down ? '' : (s.boss ? `${s.boss.name}` : '');
   }
 })();
 </script>

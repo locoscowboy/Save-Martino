@@ -2,6 +2,8 @@
 // A wipe (everyone down at once) replays the boss from its last checkpoint instead of ending the run.
 import { BOSSES, MECHANICS, PLAYER } from './bosses.js';
 
+// Finished runs of every team since the server started, for the scoreboard on the results screen.
+export const RUNS = [];
 export const MAX_PLAYERS = 3; // teams of three; boss hp is tuned for a full team and scales down below that
 const ARENA = { w: 960, h: 540, top: 300, bottom: 520 };
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
@@ -36,6 +38,11 @@ export class Room {
     if (this.hostId === id) this.hostId = this.players.keys().next().value ?? null; // the next player inherits the host role
     this.lastActivity = Date.now();
   }
+  setChar(id, char) {
+    const p = this.players.get(id), c = this.roster.find(r => r.id === char);
+    if (!p || !c || !this.inLobby()) return;
+    p.char = c.id; p.mechanic = c.mechanic || 'burst'; this.lastActivity = Date.now();
+  }
   setReady(id, ready) { const p = this.players.get(id); if (p) { p.ready = !!ready; this.lastActivity = Date.now(); } }
   setInput(id, inp) {
     const cur = this.inputs.get(id); if (!cur) return;
@@ -58,9 +65,11 @@ export class Room {
     this.beginStory();
     return true;
   }
-  beginStory() {
+  // kind: 'act' before each boss, 'ending' after the last one (then results), 'retry' after a wipe
+  beginStory(kind = 'act') {
     const card = this.script.story[this.act] || { text: '' };
-    this.phase = 'story'; this.story = { text: card.text, until: this.t + (card.seconds || 6) };
+    const lines = card.lines || (card.text ? [card.text] : []);
+    this.phase = 'story'; this.story = { kind, act: this.act, scene: card.scene || null, lines, text: lines.join(' '), start: this.t, until: this.t + (card.seconds || 6) };
     this.projectiles = [];
   }
   beginFight() {
@@ -82,24 +91,29 @@ export class Room {
   wipe() {
     const b = this.boss; this.wipes += 1; this.retry = true; this.projectiles = [];
     const text = (this.script.retry || 'Everyone is down. {boss} is still standing. Again!').replace('{boss}', b.name);
-    this.phase = 'story'; this.story = { text, until: this.t + 4 };
+    this.phase = 'story'; this.story = { kind: 'retry', act: this.act, scene: null, lines: [text], text, start: this.t, until: this.t + 4 };
     b.say = { text: b.lines.wipe || '', until: this.t + 4 }; b.anim = 'idle'; b.charge = null; b.windup = null;
   }
   endFight() {
     this.act += 1;
-    if (this.act >= BOSSES.length) {
-      const ps = [...this.players.values()];
-      const mvp = [...ps].sort((a, b) => b.dmg - a.dmg)[0];
-      this.result = { time: Math.round(this.clock * 10) / 10, deaths: ps.reduce((s, p) => s + p.deaths, 0), wipes: this.wipes, mvp: mvp ? mvp.name : '' };
-      this.phase = 'results'; this.boss = null; this.projectiles = [];
-      for (const p of ps) p.ready = false; // a replay needs everyone ready again
-    } else this.beginStory();
+    if (this.act >= BOSSES.length) { this.boss = null; this.beginStory('ending'); } // Tino turns back, the villa party, then results
+    else this.beginStory();
+  }
+  finishRun() {
+    const ps = [...this.players.values()];
+    const ranked = [...ps].sort((a, b) => b.dmg - a.dmg || a.deaths - b.deaths);
+    const mvp = ranked[0];
+    this.result = { time: Math.round(this.clock * 10) / 10, deaths: ps.reduce((s, p) => s + p.deaths, 0), wipes: this.wipes, mvp: mvp ? mvp.name : '', mvpChar: mvp ? mvp.char : '',
+      players: ranked.map(p => ({ name: p.name, char: p.char, dmg: p.dmg, deaths: p.deaths })) };
+    RUNS.push({ code: this.code, at: Date.now(), ...this.result });
+    this.phase = 'results'; this.boss = null; this.projectiles = []; this.story = null;
+    for (const p of ps) p.ready = false; // a replay needs everyone ready again
   }
 
   // ---------- simulation ----------
   step(dt) {
     this.t += dt; this.events = [];
-    if (this.phase === 'story') { if (this.t >= this.story.until) this.beginFight(); return this.events; }
+    if (this.phase === 'story') { if (this.t >= this.story.until) { if (this.story.kind === 'ending') this.finishRun(); else this.beginFight(); } return this.events; }
     if (this.phase !== 'fight') return this.events;
     this.clock += dt;
     for (const p of this.players.values()) this.stepPlayer(p, this.inputs.get(p.id), dt);
@@ -240,20 +254,30 @@ export class Room {
   // ---------- output ----------
   snapshot() {
     const players = {};
-    for (const p of this.players.values()) players[p.id] = { name: p.name, char: p.char, x: Math.round(p.x), y: Math.round(p.y), facing: p.facing, anim: p.anim, hp: p.hp, cd: Math.round(p.cd * 10) / 10, deaths: p.deaths, dmg: p.dmg, ready: p.ready, down: p.down > 0 ? Math.ceil(p.down) : 0 };
+    for (const p of this.players.values()) players[p.id] = { name: p.name, char: p.char, x: Math.round(p.x), y: Math.round(p.y), facing: p.facing, anim: p.anim, hp: p.hp, cd: Math.round(p.cd * 10) / 10, cdMax: (MECHANICS[p.mechanic] || MECHANICS.burst).cooldown, deaths: p.deaths, dmg: p.dmg, ready: p.ready, down: p.down > 0 ? Math.ceil(p.down) : 0, downT: p.down > 0 ? Math.round(p.down * 10) / 10 : 0 };
     const b = this.boss;
     return {
-      t: Math.round(this.t * 100) / 100, room: this.code, code: this.code, host: this.hostId, maxPlayers: MAX_PLAYERS, maxHp: PLAYER.hp, canStart: this.canStart(),
+      t: Math.round(this.t * 100) / 100, room: this.code, respawn: PLAYER.respawn, code: this.code, host: this.hostId, maxPlayers: MAX_PLAYERS, maxHp: PLAYER.hp, canStart: this.canStart(),
       phase: this.phase, act: this.act,
       story: this.phase === 'story' ? this.story : null,
       players,
       boss: b ? { id: b.id, name: b.name, x: Math.round(b.x), y: Math.round(b.y), facing: b.facing, hp: Math.max(0, b.hp), maxHp: b.maxHp, anim: b.anim, move: b.move, phase: b.phase, w: b.def.w, h: b.def.h, say: b.say && b.say.until > this.t ? b.say : null, arena: b.def.arena } : null,
       projectiles: this.projectiles.map(pr => ({ id: pr.id, kind: pr.kind, x: Math.round(pr.x), y: Math.round(pr.y), h: Math.round(pr.h || 0), owner: pr.owner === 'boss' ? 'boss' : 'player' })),
-      clock: Math.round(this.clock * 10) / 10, wipes: this.wipes, result: this.result, stunned: this.t < this.stunUntil
+      clock: Math.round(this.clock * 10) / 10, wipes: this.wipes, result: this.result, stunned: this.t < this.stunUntil,
+      board: this.phase === 'results' ? scoreboard(this.code) : null
     };
   }
   summary() {
     return { room: this.code, code: this.code, phase: this.phase, act: this.act, clock: Math.round(this.clock),
       players: [...this.players.values()].map(p => ({ name: p.name, char: p.char, ready: p.ready })), result: this.result };
   }
+}
+
+// Fastest finished run per team (the first one that finished), best first; the asking team is always included.
+function scoreboard(code) {
+  const best = new Map();
+  for (const r of RUNS) { const k = r.code + ':' + r.players.map(p => p.name).sort().join(','); const b = best.get(k); if (!b || r.time < b.time) best.set(k, r); }
+  const rows = [...best.values()].sort((a, b) => a.time - b.time || a.deaths - b.deaths);
+  return rows.slice(0, 8).map((r, i) => ({ rank: i + 1, code: r.code, time: r.time, deaths: r.deaths, wipes: r.wipes, mvp: r.mvp, mvpChar: r.mvpChar,
+    team: r.players.map(p => ({ name: p.name, char: p.char })), mine: r.code === code }));
 }
