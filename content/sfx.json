@@ -223,8 +223,15 @@
     {
       "id": "oriana_attack",
       "group": "oriana",
-      "seconds": 1.0,
-      "prompt": "Single tibetan singing bowl strike with a short shimmering ring"
+      "seconds": 0.6,
+      "prompt": "Short martial arts palm strike, quick whoosh then a soft thump, cartoon, clean",
+      "note": "Replaced 2026-10-16: the singing-bowl strike got tiring when spammed. oriana_attack_b is a softer whoosh-and-slap variant the renderer picks at random."
+    },
+    {
+      "id": "oriana_attack_b",
+      "group": "oriana",
+      "seconds": 0.6,
+      "prompt": "Quick soft air whoosh swipe ending in a light palm slap, cartoon fighting game, short, dry"
     },
     {
       "id": "oriana_special",
