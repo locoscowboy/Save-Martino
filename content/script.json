@@ -2,7 +2,7 @@
   "premise": "Martino is Tino's full name, the farm's little dog. Someone at the retreat put prototype AI glasses on him. The glasses took over and Martino ran off, and the longer they run the more of a monster he becomes. Beat him, the glasses fall off, and he is Tino again. Tone: Italian telenovela. Manga-style story cards between the fights (arena art, the bosses' poses, lines revealed one by one) and speech bubbles in the fights.",
   "story": [
     {
-      "seconds": 14,
+      "seconds": 23,
       "scene": "prologue",
       "lines": [
         "Via Falchi. Tino the chihuahua is everyone's favourite.",
@@ -10,10 +10,20 @@
         "The glasses took over. Tino became Monster Martino and ran off.",
         "Nonna saw it all. Get past her first!"
       ],
-      "text": "Via Falchi. Tino the chihuahua is everyone's favourite. Then someone put prototype AI glasses on him. The glasses took over. Tino became Monster Martino and ran off. Nonna saw it all. Get past her first!"
+      "text": "Via Falchi. Tino the chihuahua is everyone's favourite. Then someone put prototype AI glasses on him. The glasses took over. Tino became Monster Martino and ran off. Nonna saw it all. Get past her first!",
+      "pages": [
+        {
+          "lines": 2,
+          "seconds": 11
+        },
+        {
+          "lines": 2,
+          "seconds": 12
+        }
+      ]
     },
     {
-      "seconds": 9,
+      "seconds": 11,
       "scene": "woods",
       "lines": [
         "Martino's tracks lead into the hazelnut woods.",
@@ -23,7 +33,7 @@
       "text": "Martino's tracks lead into the hazelnut woods. The Peacock blocks the path. He wants an audience. Beat him to follow the trail!"
     },
     {
-      "seconds": 9,
+      "seconds": 11,
       "scene": "venice",
       "lines": [
         "Venice. The glasses have been on too long.",

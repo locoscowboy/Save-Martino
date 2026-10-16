@@ -66,10 +66,15 @@ export class Room {
     return true;
   }
   // kind: 'act' before each boss, 'ending' after the last one (then results), 'retry' after a wipe
-  beginStory(kind = 'act') {
+  // page: a card can be split into pages ({ lines: n, seconds }) so a long card is read in parts; lines holds the page's
+  // lines, allLines the whole card (the watch page keeps earlier pages' panels on screen) and offset where the page starts.
+  beginStory(kind = 'act', page = 0) {
     const card = this.script.story[this.act] || { text: '' };
-    const lines = card.lines || (card.text ? [card.text] : []);
-    this.phase = 'story'; this.story = { kind, act: this.act, scene: card.scene || null, lines, text: lines.join(' '), start: this.t, until: this.t + (card.seconds || 6) };
+    const all = card.lines || (card.text ? [card.text] : []);
+    const pages = Array.isArray(card.pages) && card.pages.length ? card.pages : [{ lines: all.length, seconds: card.seconds || 6 }];
+    const pg = pages[Math.min(page, pages.length - 1)], offset = pages.slice(0, page).reduce((n, q) => n + (q.lines || 0), 0);
+    const lines = all.slice(offset, offset + (pg.lines || all.length - offset));
+    this.phase = 'story'; this.story = { kind, act: this.act, page, pages: pages.length, offset, scene: card.scene || null, lines, allLines: all, text: lines.join(' '), start: this.t, until: this.t + (pg.seconds || card.seconds || 6) };
     this.projectiles = [];
   }
   beginFight() {
@@ -113,7 +118,7 @@ export class Room {
   // ---------- simulation ----------
   step(dt) {
     this.t += dt; this.events = [];
-    if (this.phase === 'story') { if (this.t >= this.story.until) { if (this.story.kind === 'ending') this.finishRun(); else this.beginFight(); } return this.events; }
+    if (this.phase === 'story') { const st = this.story; if (this.t >= st.until) { if (st.kind === 'ending') this.finishRun(); else if (st.kind === 'act' && st.page + 1 < st.pages) this.beginStory('act', st.page + 1); else this.beginFight(); } return this.events; }
     if (this.phase !== 'fight') return this.events;
     this.clock += dt;
     for (const p of this.players.values()) this.stepPlayer(p, this.inputs.get(p.id), dt);

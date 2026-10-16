@@ -1,10 +1,11 @@
 // Bosses as data. Patterns are functions of (room, boss, dt) that schedule attacks; keep them small.
 // Arena: 960×540, ground band y 300..520. Boss stands on the right by default.
 // hp is for a full team of three (room.js scales it down for smaller teams); check changes with `npm run sim`.
+// 2026-10-16: all three cut by 30% (2000/2400/2800 before) so a run finishes faster at the game night.
 
 export const BOSSES = [
   {
-    id: 'nonna', name: 'Nonna', hp: 2000, speed: 60, w: 90, h: 150,
+    id: 'nonna', name: 'Nonna', hp: 1400, speed: 60, w: 90, h: 150,
     arena: 'farm',
     patterns: {
       1: [
@@ -19,7 +20,7 @@ export const BOSSES = [
     }
   },
   {
-    id: 'peacock', name: 'The Peacock', hp: 2400, speed: 90, w: 120, h: 160,
+    id: 'peacock', name: 'The Peacock', hp: 1680, speed: 90, w: 120, h: 160,
     arena: 'woods',
     patterns: {
       1: [
@@ -34,7 +35,7 @@ export const BOSSES = [
     }
   },
   {
-    id: 'martino', name: 'Monster Martino', hp: 2800, speed: 110, w: 140, h: 170,
+    id: 'martino', name: 'Monster Martino', hp: 1960, speed: 110, w: 140, h: 170,
     arena: 'venice',
     patterns: {
       1: [
