@@ -1,0 +1,32 @@
+{
+ "model": "gemini-3-pro-image",
+ "aspect": "16:9",
+ "size": "2K",
+ "look": "Art direction: the visual language of the 2D fighting game Little Fighter 2. Hand-drawn pixel-art look with crisp black outlines, flat cel colours with one darker shadow tone and one highlight, slightly chunky proportions (about five and a half heads tall for humans), readable at small size. No photorealism, no soft gradients, no blur, no text other than the labels asked for, no logos of real brands, no watermark.",
+ "jobs": [
+  {
+   "out": "out/jin_turnaround_v4.png",
+   "refs": [
+    "out/jin_turnaround_v3.png",
+    "refs/faces/jin_face.jpg"
+   ],
+   "prompt": "Character turnaround and action sheet for the playable fighter JIN. The first reference image is the previous version of this exact sheet: reproduce it faithfully, same character design, same red Tang jacket with gold trim, same black trousers and shoes, same chopsticks and rice bowl, same ten poses, same layout, same scale, same labels and same white background. Change ONE thing only: replace the dark tinted aviator sunglasses with ordinary everyday EYEGLASSES: a thin black rectangular frame with completely CLEAR transparent lenses, so his eyes are fully visible through them in every pose, exactly like the glasses in the second reference image (his real face). No tint, no mirror, no gradient on the lenses, not sunglasses. Plain flat solid white background, no floor, no shadows. LAYOUT RULE: exactly ten figures, no extra hero figure, clean cel style not chunky pixel art. Row 1: FRONT, THREE-QUARTER, SIDE, BACK. Row 2: IDLE, WALK 1, WALK 2, ATTACK, SPECIAL, HURT."
+  },
+  {
+   "out": "out/nonna_boss_v3.png",
+   "refs": [
+    "out/nonna_boss_v2.png",
+    "refs/faces/nonna_face.jpg"
+   ],
+   "prompt": "Boss sprite sheet for the first boss, NONNA. The first reference image is the previous version of this exact sheet: reproduce it faithfully, same woman, same likeness (second reference is her real face), same short layered dark-brown hair with fringe, same orange fleece with black side panels under the flour-dusted white apron, same black trousers and slippers, same wooden spoon and stack of plates, same eight poses, layout, scale, labels and white background. Change ONE thing only: her EXPRESSION. She is no longer smiling: in every pose she is FURIOUS, a classic angry Italian nonna, eyebrows slammed down in a hard V, eyes narrowed and blazing, mouth open mid-shout showing teeth, a vein mark or small red anger marks on her temple, head thrust forward. In DEFEATED she sits dazed and grumpy with a pout, still not smiling. Plain flat solid white background, no floor, no shadows. LAYOUT RULE: exactly eight figures, clean cel style not chunky pixel art. Row 1: IDLE, WALK 1, WALK 2, ATTACK. Row 2: THROW, SPECIAL, HURT, DEFEATED."
+  },
+  {
+   "out": "out/bricciola_v1.png",
+   "refs": [
+    "refs/ready/cat.jpg",
+    "out/jin_turnaround_v3.png"
+   ],
+   "prompt": "Character turnaround and action sheet for a playable fighter, BRICCIOLA, who is a real cat. The first reference image is the real cat: a big fluffy long-haired cat, grey-brown on the back, head and tail, white chest, white muzzle and white paws, a grey patch across the forehead, half-closed sleepy unimpressed eyes, pink nose, very fluffy. Keep her exact colouring and that bored, judgemental expression. The second reference image is the sheet of a playable human fighter in this game: match its art style, line weight, label style, white background and layout exactly, but draw Bricciola as a cat standing upright on her hind legs like a cartoon fighter, about two thirds of the human's height, round and fluffy, wearing the green-red-yellow tartan wool blanket from her photo tied around her neck as a small cape. No other clothes. Her power is being irresistibly cuddly. Plain flat solid white background, no floor, no shadows. LAYOUT RULE: exactly ten figures, no extra hero figure, clean cel style not chunky pixel art. Each figure has a small plain capital label underneath. Row 1, standing neutral turnaround at identical scale: FRONT, THREE-QUARTER, SIDE, BACK. Row 2, side view facing LEFT: IDLE (sitting-ish slouch, tail curling), WALK 1, WALK 2 (lazy strut), ATTACK (quick claw swipe with one paw, three scratch marks), SPECIAL (CUDDLE: she flops onto her back, belly up, paws in the air, purring, surrounded by a big pink glow and many floating hearts that pull everyone toward her), HURT (puffed up, fur standing on end, ears back, yowling). Exactly ten figures."
+  }
+ ]
+}
