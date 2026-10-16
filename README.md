@@ -9,8 +9,8 @@ Plan and decisions: https://claude.ai/artifact/DSr6fncsYNN2vMTHdfPqZr
 ```
 web/        static site, deployed to Netlify (phone controller, watch page, TV grid)
 server/     Node + Socket.IO game server: the only place the game is simulated; server/tools/ holds the dev scripts
-content/    roster.json (characters), script.json (story cards and boss lines), sfx.json (sound manifest)
-assets/     Jin's sheets (characters/, bosses/), arenas/, sfx/, and sprites/: the atlases cut from the sheets
+content/    roster.json (characters), script.json (story cards and boss lines), sfx.json (sound manifest), music.json (music manifest)
+assets/     Jin's sheets (characters/, bosses/), arenas/, sfx/, music/, and sprites/: the atlases cut from the sheets
 ```
 
 ## Run locally
@@ -47,6 +47,8 @@ Projectiles come from the same sheets: `PROPS` in the tool cuts the plate, the f
 ## Sound
 
 `content/sfx.json` lists the clips in `assets/sfx/` (`assets/sfx_fal/` is an alternative generation of the same ids, swap the folder name in `renderer.js` to try it). The team laptop's watch page plays them from the differences between two snapshots (`createSfx` in `renderer.js`): a character's attack or special frame, a landed hit with a random `_b` variant and a ±5 % pitch, the boss' throw/special/hurt/defeat, the story card, the boss intro, the victory fanfare. Volumes follow the manifest's tips: hits 1.0, specials 0.8, UI 0.6. The TV grid is silent. Browsers need one click or key on the page before any sound: the help line in the corner says so until it is unlocked. The phone plays the menu blip on taps.
+
+`content/music.json` lists the five background tracks in `assets/music/`: `menu_select` (menu and character select), `fight_nonna`, `fight_peacock`, `fight_martino` (one per story fight) and `results` (the results screen). All are instrumental and meant to loop. They are not wired into the pages yet.
 
 ## Balance
 

@@ -1,0 +1,35 @@
+{
+  "note": "Background music generated with ElevenLabs Music v2.5 on fal.ai, instrumental, in the style of the reference track Battita di Ferro. Files live in assets/music/<id>.mp3. Each track is meant to loop.",
+  "tracks": [
+    {
+      "id": "menu_select",
+      "plays": "menu and character select",
+      "seconds": 80,
+      "prompt": "Instrumental video game menu and character select theme for a comedic Italian co-op boss-rush game. Modern hi-fi chiptune fused with J-rock, 150 BPM, 4/4, bright major key. Punchy compressed electronic drums with 16th-note hi-hats, driving synth bass, bright square-wave lead and fast chiptune arpeggios, supersaw chords, light chugging rhythm guitar. A playful, catchy main hook doubled on mandolin, with a little accordion color, so it feels Italian. Upbeat, inviting, 'pick your fighter' energy, confident but not yet a battle. Steady energy with no fade, designed to loop seamlessly."
+    },
+    {
+      "id": "fight_nonna",
+      "plays": "story 1 fight, Nonna",
+      "seconds": 110,
+      "prompt": "Instrumental boss battle theme for a retro arcade fighting game, first boss: an angry Italian grandmother in her farmhouse kitchen. Modern hi-fi chiptune fused with J-rock, 165 BPM, 4/4. Relentless 16th-note synth bass, punchy compressed drums with fast programmed fills, distorted power-chord guitars, supersaw chords, square-wave chiptune arpeggios. Weave in a tarantella feel: accordion and mandolin playing fast folk runs, tambourine. Heroic minor-key verses, triumphant major-key chorus hook, a short shred synth solo. Comedic but intense, wall of sound, designed to loop seamlessly, no fade out."
+    },
+    {
+      "id": "fight_peacock",
+      "plays": "story 2 fight, Peacock",
+      "seconds": 120,
+      "prompt": "Instrumental boss battle theme for a retro arcade fighting game, second boss: a vain, flamboyant giant peacock diva in a hazelnut forest. Modern hi-fi chiptune fused with J-rock, 170 BPM, 4/4. Driving 16th-note synth bass, tight punchy drums, distorted rhythm guitar, thick supersaw chords, bright chiptune lead. Add theatrical flair: harpsichord arpeggios, dramatic string stabs and a glam, showy lead melody, like a telenovela villain showing off. Swaggering verses, big anthemic major-key chorus, a virtuosic synth solo. High energy throughout, designed to loop seamlessly, no fade out."
+    },
+    {
+      "id": "fight_martino",
+      "plays": "story 3 fight, Martino",
+      "seconds": 146,
+      "prompt": "Instrumental final boss battle theme for a retro arcade fighting game: a little dog turned into a huge monster by AI glasses, fought in Venice. The most epic track of the game. Modern hi-fi chiptune fused with J-rock and orchestral elements, 175 BPM, 4/4. Relentless 16th-note synth bass, heavy compressed drums with big fills, heavy distorted guitars, supersaw walls, frantic chiptune arpeggios, glitchy digital synth textures for the AI glasses. Venetian drama: church organ, choir pads, mandolin tremolo, timpani. Dark urgent minor-key sections building to a heroic, triumphant major-key chorus, an intense shred synth solo. Maximum energy, designed to loop seamlessly, no fade out."
+    },
+    {
+      "id": "results",
+      "plays": "results screen after the run",
+      "seconds": 50,
+      "prompt": "Instrumental victory and results screen music for a retro arcade game, played while the team's time, deaths and MVP are shown. Modern hi-fi chiptune fused with light J-rock, 120 BPM, 4/4, warm major key. Relaxed groove with punchy drums, bouncy synth bass, bright square-wave lead, sparkling arpeggios, a mandolin and accordion melody for an Italian festa feel. Proud, happy and celebratory but calmer than the battle music, a satisfying 'well done' mood. Steady energy, designed to loop seamlessly, no fade out."
+    }
+  ]
+}
