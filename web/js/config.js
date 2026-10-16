@@ -2,7 +2,7 @@
 // On the LAN the server serves these pages itself: leave SERVER_URL empty and the page uses its own origin.
 // On Netlify the pages carry the server in the URL instead (?server=https://xxxx.trycloudflare.com): the QR code on
 // the watch page fills it in for the phones, and the TV/laptop pages pass it along. SERVER_URL is only the fallback.
-window.SERVER_URL = '';
+window.SERVER_URL = location.hostname.endsWith('.netlify.app') ? 'https://save-martino.onrender.com' : '';
 window.SERVER = (function () {
   const q = new URLSearchParams(location.search).get('server');
   try {
