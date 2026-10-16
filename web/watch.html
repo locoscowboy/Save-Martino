@@ -16,24 +16,25 @@
   .cell { position: relative; } .cell b { position: absolute; left: 8px; top: 6px; font-size: 14px; letter-spacing: 0.15em; background: #0008; padding: 2px 8px; border-radius: 4px; }
   #help { position: fixed; right: 10px; top: 6px; font-size: 11px; color: #fffa; z-index: 40; text-shadow: 0 1px 0 #000; }
   .hint { color: #9fb1b6; font-size: 0.95rem; max-width: 46ch; }
-  /* room picker */
-  #picker { height: 100%; display: none; place-content: center; gap: 16px; text-align: center; padding: 24px; }
-  #picker.on { display: grid; }
-  #picker h1 { margin: 0; }
-  .rooms { display: grid; gap: 8px; width: min(90vw, 420px); }
-  .rooms button, #picker input { font: inherit; font-size: 1.1rem; padding: 12px; border-radius: 8px; border: 1px solid #2e3e47; background: #1a252c; color: inherit; width: 100%; cursor: pointer; text-align: left; }
-  .rooms button b { letter-spacing: 0.2em; margin-right: 12px; color: #d9a030; } .rooms button small { color: #9fb1b6; }
-  #pickCode { text-transform: uppercase; letter-spacing: 0.3em; text-align: center; font-weight: 700; }
+  /* room picker (styles in css/ui.css, .mp) */
+  #pickWrap { display: none; height: 100%; overflow-y: auto; }
+  #pickWrap.on { display: block; }
 </style>
 </head>
 <body>
-<div id="picker">
-  <h1>Rescue Martino</h1>
-  <div class="hint">Which team is this screen for? Host a game on a phone first, then pick it here.</div>
-  <div class="rooms" id="pickRooms"><div class="hint">No game yet.</div></div>
-  <input id="pickCode" type="text" placeholder="or type the code" maxlength="4" autocapitalize="characters" spellcheck="false">
-  <div class="hint">TV: <a href="#" id="tvLink" style="color:#3db5b0">all rooms in a grid</a></div>
-</div>
+<div id="pickWrap"><main class="mp" id="picker">
+  <div class="mp-title"><span class="r">RESCUE</span><span class="m">MARTINO</span><span class="tag">TEAM LAPTOP</span></div>
+  <section class="mp-card mp-pick">
+    <div class="mp-art" id="pickArt"></div>
+    <div class="mp-k">PICK YOUR TEAM'S GAME</div>
+    <h2 class="mp-h">Which team is this screen for?</h2>
+    <p class="mp-p">Host a game on a phone first. It shows up here; tap it to open its arena.</p>
+    <div class="mp-rooms" id="pickRooms"><div class="mp-empty">NO GAME YET · WAITING FOR A PHONE TO HOST</div></div>
+    <div class="mp-or">OR</div>
+    <input class="mp-code" id="pickCode" type="text" placeholder="TYPE THE CODE + ENTER" maxlength="4" autocapitalize="characters" autocomplete="off" spellcheck="false">
+    <a class="mp-btn dark" href="#" id="tvLink">TV: EVERY GAME IN A GRID</a>
+  </section>
+</main></div>
 <div id="game"></div>
 
 <div id="help"></div>
@@ -58,15 +59,20 @@
 
   // ---------- picker: no room in the URL ----------
   if (!room) {
-    $('picker').classList.add('on'); $('game').style.display = 'none';
+    $('pickWrap').classList.add('on'); $('game').style.display = 'none';
+    $('picker').style.backgroundImage = `url(${base}/assets/arenas/farm.jpg)`;
+    const cast = [['jin', 'front', .4, 30], ['euge', 'front', .34, -70], ['quentin', 'front', .34, 120]];
+    for (const [id, pose, k, dx] of cast) { const f = RM.frame(id, pose, k, { cls: 'rm-breathe', flip: dx > 0 }); f.style.left = `calc(50% + ${dx}px)`; f.style.zIndex = dx === 30 ? 2 : 1; $('pickArt').appendChild(f); }
+    const PHASE = { lobby: 'PICKING FIGHTERS', story: 'PLAYING', fight: 'PLAYING', results: 'FINISHED' };
     $('tvLink').href = pageUrl('watch.html', 'room=all');
     socket.on('connect', () => socket.emit('watch', { room: 'all' }));
     socket.on('rooms', list => {
       const host = $('pickRooms');
-      host.innerHTML = list.length ? '' : '<div class="hint">No game yet.</div>';
+      host.innerHTML = list.length ? '' : '<div class="mp-empty">NO GAME YET · WAITING FOR A PHONE TO HOST</div>';
       for (const r of list) {
-        const b = document.createElement('button');
-        b.innerHTML = `<b>${r.code}</b>${r.players.map(p => p.name).join(', ') || '<small>empty</small>'} <small>· ${r.phase}</small>`;
+        const b = document.createElement('button'); b.className = 'mp-room';
+        const faces = r.players.map(p => `<i style="background-image:url(${base}/assets/sprites/${RM.esc(p.char)}_front.png)"></i>`).join('');
+        b.innerHTML = `<span class="code">${RM.esc(r.code)}</span><span class="faces">${faces}</span><span class="who">${r.players.map(p => RM.esc(p.name)).join(', ') || 'Nobody yet'}<small class="${r.phase === 'lobby' ? '' : 'live'}">${r.players.length}/3 · ${PHASE[r.phase] || r.phase.toUpperCase()}</small></span>`;
         b.addEventListener('click', () => { location.href = pageUrl('watch.html', 'room=' + r.code); });
         host.appendChild(b);
       }
