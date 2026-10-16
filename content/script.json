@@ -1,13 +1,21 @@
 {
+  "premise": "Martino is Tino's full name, the farm's chihuahua. The AI expert at the retreat tried his prototype AI glasses on him. The glasses took over, Martino bolted, and after two days with the glasses running on his head he is a monster. Beat him, the glasses fall off, and he is Tino again. Tone: Italian telenovela. No cutscenes, just these story cards as text and the bosses' speech bubbles.",
   "story": [
-    { "seconds": 7, "text": "Friday, Via Falchi. The VR expert tries the headset on Martino, the farm's chihuahua. He panics and bolts past the olive trees. Nonna saw everything, and she blames the guests." },
-    { "seconds": 7, "text": "Saturday. Martino's tracks lead into the woods. Something big struts between the trees, and it has a VR strap tangled in its tail." },
-    { "seconds": 7, "text": "Sunday, Venice. The headset has been running on Martino's head for two days. The thing barking at pigeons in the campo is still him. Probably." },
-    { "seconds": 8, "text": "The headset falls off. Martino shrinks, shakes himself, and licks the nearest ankle. Martino saved." }
+    { "seconds": 7, "text": "Friday, Via Falchi. The AI expert at the retreat tries his prototype AI glasses on Martino, the farm's chihuahua. The glasses boot up, whisper something in his ear, and he bolts past the olive trees. Nonna saw everything, and she blames the guests." },
+    { "seconds": 7, "text": "Saturday. Martino's tracks lead into the hazelnut woods. Something big struts between the trees, furious: the little red light on the glasses has been filming it all day without asking." },
+    { "seconds": 7, "text": "Sunday, Venice. The glasses have been running on Martino's head for two days, feeding him every suggestion they have. The thing barking at pigeons in the campo is still him. Probably." },
+    { "seconds": 8, "text": "The glasses crack and fall off. Martino shrinks, shakes himself, and licks the nearest ankle. Martino saved." }
   ],
   "bosses": {
-    "nonna":   { "intro": "Tu! Too skinny! Sit!", "half": "You call that an appetite?", "defeat": "Fine. Go. Take a tupperware." },
-    "peacock": { "intro": "Finally. An audience.", "half": "You dare pluck me?", "defeat": "I was leaving anyway." },
-    "martino": { "intro": "GRRR... bark?", "half": "WOOF WOOF WOOF", "defeat": "yip!" }
+    "nonna":   { "intro": "You and your glasses! Too skinny! Sit!", "half": "You call that an appetite?", "defeat": "Fine. Go find him. Take a tupperware." },
+    "peacock": { "intro": "Finally. An audience. No cameras.", "half": "You dare pluck me?", "defeat": "I was leaving anyway. Tell the dog to delete the footage." },
+    "martino": { "intro": "GRRR... UPDATING... bark?", "half": "WOOF WOOF WOOF", "defeat": "yip!" }
+  },
+  "cast": {
+    "euge":    { "join": "Nobody panics on my farm. Except the dog.", "down": "Not in front of the guests!" },
+    "quentin": { "join": "Hold my baguette.", "down": "Sacrebleu." },
+    "jin":     { "join": "Chopsticks don't miss.", "down": "Rice everywhere." },
+    "oriana":  { "join": "Breathe. Then hit it.", "down": "I was so calm." },
+    "carlos":  { "join": "Dinner can wait. Martino can't.", "down": "My picanha!" }
   }
 }
