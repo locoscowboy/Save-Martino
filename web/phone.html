@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<title>Save Martino · controller</title>
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #111a1f; color: #ecf1ee; font-family: system-ui, sans-serif; touch-action: none; overscroll-behavior: none; user-select: none; -webkit-user-select: none; }
+  #join { height: 100%; display: grid; place-content: center; gap: 14px; padding: 20px; text-align: center; }
+  #join h1 { margin: 0; font-size: 1.8rem; }
+  #join input, #join select, #join button { font: inherit; font-size: 1.1rem; padding: 12px; border-radius: 8px; border: 1px solid #2e3e47; background: #1a252c; color: inherit; width: min(80vw, 320px); }
+  #join button { background: #d23a2c; border-color: #d23a2c; font-weight: 700; }
+  .chars { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; width: min(90vw, 420px); }
+  .char { padding: 10px; border-radius: 8px; border: 2px solid #2e3e47; background: #1a252c; cursor: pointer; display: grid; gap: 2px; text-align: left; }
+  .char.sel { border-color: #3db5b0; } .char b { font-size: 1rem; } .char small { color: #9fb1b6; font-size: 0.75rem; }
+  #pad { display: none; height: 100%; position: relative; }
+  #hud { position: absolute; top: 10px; left: 0; right: 0; display: flex; justify-content: space-between; padding: 0 16px; font-weight: 700; }
+  #hud .hearts { color: #f05a4c; letter-spacing: 2px; }
+  #stick { position: absolute; left: 6vw; bottom: 10vh; width: 42vw; max-width: 260px; aspect-ratio: 1; border-radius: 50%; background: rgba(255,255,255,0.06); border: 2px solid rgba(255,255,255,0.15); }
+  #knob { position: absolute; left: 50%; top: 50%; width: 38%; aspect-ratio: 1; border-radius: 50%; background: rgba(255,255,255,0.25); transform: translate(-50%, -50%); }
+  .btn { position: absolute; width: 22vw; max-width: 130px; aspect-ratio: 1; border-radius: 50%; display: grid; place-content: center; font-weight: 900; font-size: 1.2rem; border: 3px solid; }
+  .btn:active, .btn.on { filter: brightness(1.4); }
+  #atk { right: 24vw; bottom: 8vh; background: #d23a2c33; border-color: #d23a2c; }
+  #spc { right: 4vw; bottom: 22vh; background: #3db5b033; border-color: #3db5b0; }
+  #spc.cd { opacity: 0.35; }
+  #start { position: absolute; left: 50%; top: 14vh; transform: translateX(-50%); padding: 12px 24px; border-radius: 8px; background: #d9a030; color: #1a0d0b; font-weight: 800; border: 0; font-size: 1rem; display: none; }
+  #msg { position: absolute; left: 0; right: 0; top: 44%; text-align: center; color: #9fb1b6; font-size: 0.95rem; padding: 0 16px; }
+  #rot { display: none; position: fixed; inset: 0; background: #111a1f; place-content: center; text-align: center; z-index: 5; }
+  @media (orientation: portrait) { #pad.live ~ #rot { display: grid; } }
+</style>
+</head>
+<body>
+<div id="join">
+  <h1>Save Martino</h1>
+  <div>Room: <b id="roomName"></b></div>
+  <input id="name" type="text" placeholder="Your name" maxlength="16" autocomplete="off">
+  <div class="chars" id="chars"></div>
+  <button id="go" type="button">Join</button>
+  <div id="joinErr" style="color:#f05a4c"></div>
+</div>
+<div id="pad">
+  <div id="hud"><span id="who"></span><span class="hearts" id="hearts"></span></div>
+  <button id="start" type="button">Start the run</button>
+  <div id="msg"></div>
+  <div id="stick"><div id="knob"></div></div>
+  <div id="atk" class="btn">ATK</div>
+  <div id="spc" class="btn">SP</div>
+</div>
+<div id="rot"><div>Turn your phone sideways</div></div>
+
+<script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+<script src="js/config.js"></script>
+<script>
+(function () {
+  const qs = new URLSearchParams(location.search);
+  const room = (qs.get('room') || 'bacaro').toLowerCase();
+  document.getElementById('roomName').textContent = room;
+  const base = window.SERVER_URL || location.origin;
+  let roster = [], char = null, socket = null, myId = null;
+
+  fetch(base + '/content/roster.json').then(r => r.json()).then(list => {
+    roster = list; const host = document.getElementById('chars');
+    list.forEach((c, i) => {
+      const d = document.createElement('div'); d.className = 'char' + (i === 0 ? ' sel' : ''); if (i === 0) char = c.id;
+      d.innerHTML = `<b>${c.name}</b><small>${c.label || ''}</small><small>${c.special.split(':')[0]}</small>`;
+      d.addEventListener('click', () => { document.querySelectorAll('.char').forEach(x => x.classList.remove('sel')); d.classList.add('sel'); char = c.id; });
+      host.appendChild(d);
+    });
+  }).catch(() => { document.getElementById('joinErr').textContent = 'Cannot reach the game server. Check SERVER_URL in js/config.js.'; });
+
+  try { const n = localStorage.getItem('sm-name'); if (n) document.getElementById('name').value = n; } catch (e) {}
+
+  document.getElementById('go').addEventListener('click', () => {
+    const name = document.getElementById('name').value.trim() || 'Player';
+    try { localStorage.setItem('sm-name', name); } catch (e) {}
+    socket = io(base, { transports: ['websocket', 'polling'] });
+    socket.on('connect', () => socket.emit('join', { room, name, char }));
+    socket.on('joined', ({ id }) => { myId = id; document.getElementById('join').style.display = 'none'; const pad = document.getElementById('pad'); pad.style.display = 'block'; pad.classList.add('live'); document.getElementById('who').textContent = name; });
+    socket.on('state', onState);
+    socket.on('hit', () => { try { navigator.vibrate && navigator.vibrate(80); } catch (e) {} });
+    socket.on('connect_error', () => { document.getElementById('joinErr').textContent = 'Cannot connect to the game server.'; });
+  });
+
+  // ---------- input ----------
+  const input = { dx: 0, dy: 0, attack: false, special: false };
+  let dirty = true;
+  const stick = document.getElementById('stick'), knob = document.getElementById('knob');
+  let stickId = null;
+  function setStick(e) {
+    const r = stick.getBoundingClientRect(); const cx = r.left + r.width / 2, cy = r.top + r.height / 2; const rad = r.width / 2;
+    let dx = (e.clientX - cx) / rad, dy = (e.clientY - cy) / rad; const len = Math.hypot(dx, dy); if (len > 1) { dx /= len; dy /= len; }
+    const dead = 0.15; input.dx = Math.abs(dx) < dead ? 0 : dx; input.dy = Math.abs(dy) < dead ? 0 : dy;
+    knob.style.transform = `translate(calc(-50% + ${dx * rad * 0.6}px), calc(-50% + ${dy * rad * 0.6}px))`; dirty = true;
+  }
+  stick.addEventListener('pointerdown', e => { stickId = e.pointerId; stick.setPointerCapture(e.pointerId); setStick(e); });
+  stick.addEventListener('pointermove', e => { if (e.pointerId === stickId) setStick(e); });
+  const endStick = e => { if (e.pointerId === stickId) { stickId = null; input.dx = 0; input.dy = 0; knob.style.transform = 'translate(-50%, -50%)'; dirty = true; } };
+  stick.addEventListener('pointerup', endStick); stick.addEventListener('pointercancel', endStick);
+  const bind = (id, key) => { const el = document.getElementById(id);
+    el.addEventListener('pointerdown', e => { e.preventDefault(); input[key] = true; el.classList.add('on'); dirty = true; });
+    const up = () => { input[key] = false; el.classList.remove('on'); dirty = true; };
+    el.addEventListener('pointerup', up); el.addEventListener('pointercancel', up); el.addEventListener('pointerleave', up); };
+  bind('atk', 'attack'); bind('spc', 'special');
+  // keyboard, for testing on a laptop
+  const keys = {};
+  addEventListener('keydown', e => { keys[e.key] = true; kb(); }); addEventListener('keyup', e => { keys[e.key] = false; kb(); });
+  function kb() { input.dx = (keys.ArrowRight || keys.d ? 1 : 0) - (keys.ArrowLeft || keys.a ? 1 : 0); input.dy = (keys.ArrowDown || keys.s ? 1 : 0) - (keys.ArrowUp || keys.w ? 1 : 0); input.attack = !!(keys[' '] || keys.j); input.special = !!(keys.k || keys.Shift); dirty = true; }
+  setInterval(() => { if (socket && myId && dirty) { socket.emit('input', input); dirty = false; } }, 50);
+  setInterval(() => { dirty = true; }, 250); // keepalive so a dropped packet never sticks a direction
+
+  document.getElementById('start').addEventListener('click', () => socket && socket.emit('start'));
+
+  // ---------- HUD ----------
+  function onState(s) {
+    const me = s.players[myId]; if (!me) return;
+    document.getElementById('hearts').textContent = '♥'.repeat(Math.max(0, me.hp)) + '♡'.repeat(Math.max(0, 3 - me.hp));
+    const spc = document.getElementById('spc'); spc.classList.toggle('cd', me.cd > 0); spc.textContent = me.cd > 0 ? Math.ceil(me.cd) : 'SP';
+    document.getElementById('start').style.display = (s.phase === 'lobby' || s.phase === 'results') ? 'block' : 'none';
+    const msg = document.getElementById('msg');
+    if (s.phase === 'lobby') msg.textContent = `${Object.keys(s.players).length} in the room. Press Start when everyone is in.`;
+    else if (s.phase === 'story') msg.textContent = s.story ? s.story.text : '';
+    else if (s.phase === 'fight') msg.textContent = me.anim === 'down' ? 'Down. Back in a moment.' : (s.boss ? `${s.boss.name}: ${s.boss.hp}/${s.boss.maxHp}` : '');
+    else if (s.phase === 'results' && s.result) msg.textContent = `Martino saved in ${s.result.time}s with ${s.result.deaths} deaths. MVP: ${s.result.mvp}`;
+  }
+})();
+</script>
+</body>
+</html>

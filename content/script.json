@@ -1,0 +1,13 @@
+{
+  "story": [
+    { "seconds": 7, "text": "Friday, Via Falchi. The VR expert tries the headset on Martino, the farm's chihuahua. He panics and bolts past the olive trees. Nonna saw everything, and she blames the guests." },
+    { "seconds": 7, "text": "Saturday. Martino's tracks lead into the woods. Something big struts between the trees, and it has a VR strap tangled in its tail." },
+    { "seconds": 7, "text": "Sunday, Venice. The headset has been running on Martino's head for two days. The thing barking at pigeons in the campo is still him. Probably." },
+    { "seconds": 8, "text": "The headset falls off. Martino shrinks, shakes himself, and licks the nearest ankle. Martino saved." }
+  ],
+  "bosses": {
+    "nonna":   { "intro": "Tu! Too skinny! Sit!", "half": "You call that an appetite?", "defeat": "Fine. Go. Take a tupperware." },
+    "peacock": { "intro": "Finally. An audience.", "half": "You dare pluck me?", "defeat": "I was leaving anyway." },
+    "martino": { "intro": "GRRR... bark?", "half": "WOOF WOOF WOOF", "defeat": "yip!" }
+  }
+}

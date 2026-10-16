@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Save Martino</title>
+<style>
+  body { margin: 0; font-family: system-ui, sans-serif; background: #111a1f; color: #ecf1ee; padding: 24px; }
+  h1 { font-size: 2rem; margin: 0 0 8px; } p { color: #9fb1b6; max-width: 60ch; }
+  .rooms { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); margin-top: 20px; }
+  .room { background: #1a252c; border: 1px solid #2e3e47; border-radius: 6px; padding: 14px; display: grid; gap: 6px; }
+  a { color: #3db5b0; } .room b { font-size: 1.1rem; text-transform: capitalize; }
+</style>
+</head>
+<body>
+<h1>Save Martino</h1>
+<p>Pick your team's room. Phones open the controller, the team laptop opens the watch page, the TV opens the grid.</p>
+<p><a href="watch.html?room=all">TV: all rooms</a></p>
+<div class="rooms" id="rooms"></div>
+<script src="js/config.js"></script>
+<script>
+  const host = document.getElementById('rooms');
+  for (const r of window.ROOMS) {
+    const d = document.createElement('div'); d.className = 'room';
+    d.innerHTML = `<b>${r}</b><a href="phone.html?room=${r}">Phone controller</a><a href="watch.html?room=${r}">Laptop watch page</a>`;
+    host.appendChild(d);
+  }
+</script>
+</body>
+</html>
