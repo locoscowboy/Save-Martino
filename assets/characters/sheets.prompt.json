@@ -1,0 +1,78 @@
+{
+ "model": "gemini-3-pro-image",
+ "aspect": "16:9",
+ "size": "2K",
+ "look": "Art direction: the visual language of the 2D fighting game Little Fighter 2. Hand-drawn pixel-art look with crisp black outlines, flat cel colours with one darker shadow tone and one highlight, slightly chunky proportions (about five and a half heads tall for humans), readable at small size. No photorealism, no soft gradients, no blur, no text other than the labels asked for, no logos of real brands, no watermark.",
+ "jobs": [
+  {
+   "out": "out/euge_turnaround_v1.png",
+   "refs": [
+    "refs/ready/euge_full.jpg",
+    "out/jin_turnaround_v2.png"
+   ],
+   "prompt": "Character sprite sheet for a playable fighter named EUGE. The first reference image is a photo of the real person: turn him into a stylised game character that is clearly recognisable (short dark hair, round black-rimmed glasses, big grin, slim build), friendly and heroic, not mocking. The second reference image is the finished sheet of another fighter in the same game: match its art style, line weight, scale, proportions, layout, label style and framing exactly; this is a different person, do not copy his face or clothes. EUGE is the Italian host of a Venetian countryside retreat and fights with a long wooden gondola oar held in both hands. Outfit: a gondolier look with a wink: navy-and-white horizontally striped shirt, dark trousers with a red sash, a flat straw boater hat with a red ribbon, keep his glasses, brown shoes. Plain flat solid white background, no floor, no shadows. Row 1, turnaround: FRONT, THREE-QUARTER, SIDE, BACK in the same relaxed fighting stance holding the oar. Row 2, side view facing right: IDLE, WALK 1, WALK 2, ATTACK (wide horizontal oar sweep, motion arc), SPECIAL (overhead oar slam, oar hitting the ground, impact lines and small stars), HURT (leaning back, eyes shut, hat flying off). Small plain capital labels under each figure."
+  },
+  {
+   "out": "out/quentin_turnaround_v1.png",
+   "refs": [
+    "refs/ready/quentin_full.jpg",
+    "out/jin_turnaround_v2.png"
+   ],
+   "prompt": "Character sprite sheet for a playable fighter named QUENTIN. The first reference image is a photo of the real person: turn him into a stylised game character that is clearly recognisable (short curly dark hair, thin moustache, sunglasses pushed up on his head, slim tall build, easy smile), charming and heroic, not mocking. The second reference image is the finished sheet of another fighter in the same game: match its art style, line weight, scale, proportions, layout, label style and framing exactly; this is a different person, do not copy his face or clothes. QUENTIN is French and fights with a long crusty baguette held like a fencing sword in his right hand, a second baguette under his left arm. Outfit: French cliches with a wink: black beret, white shirt with sleeves rolled up, a small red neckerchief, slim black trousers, black shoes. Plain flat solid white background, no floor, no shadows. Row 1, turnaround: FRONT, THREE-QUARTER, SIDE, BACK in the same relaxed fencing stance. Row 2, side view facing right: IDLE, WALK 1, WALK 2, ATTACK (fencing lunge, baguette thrust forward, two motion lines), SPECIAL (burst: he snaps the baguette and three bread chunks fly forward in a spread with crumb sparkles), HURT (leaning back, eyes shut, beret flying). Small plain capital labels under each figure."
+  },
+  {
+   "out": "out/oriana_turnaround_v1.png",
+   "refs": [
+    "refs/ready/oriana_full.jpg",
+    "out/jin_turnaround_v2.png"
+   ],
+   "prompt": "Character sprite sheet for a playable fighter named ORIANA. The first reference image is a photo of the real person: turn her into a stylised game character that is clearly recognisable (long voluminous dark curly hair with lighter curly tips, warm smile, olive skin, slim build, a thin black cord necklace with a small crystal pendant, beaded bracelets), serene and heroic, not mocking. The second reference image is the finished sheet of another fighter in the same game: match its art style, line weight, scale, proportions, layout, label style and framing exactly; this is a different person, do not copy his face or clothes. ORIANA is a spiritual, zen lady and the healer of the team. She fights with glowing palm energy and carries a small brass singing bowl with a wooden striker. Outfit: a sage-green loose knit top like in the photo, flowing cream linen wide trousers, bare feet with an anklet. Plain flat solid white background, no floor, no shadows. Row 1, turnaround: FRONT, THREE-QUARTER, SIDE, BACK in the same calm open-palm stance. Row 2, side view facing right: IDLE, WALK 1, WALK 2, ATTACK (palm strike forward releasing a glowing violet ring of energy, two motion lines), SPECIAL (sitting cross-legged in lotus pose, eyes closed, singing bowl in her lap, a soft violet aura and three small floating hearts), HURT (leaning back, eyes shut, singing bowl flying). Small plain capital labels under each figure."
+  },
+  {
+   "out": "out/farm_arena_v1.png",
+   "refs": [
+    "refs/ready/farmhouse_exterior.jpg"
+   ],
+   "prompt": "Side-scrolling fighting-game arena background based on the reference photo: the garden in front of this Veneto farmhouse (cream rendered walls, stone-trimmed gable, small square windows above, dark red shutters, a long brick barn with a terracotta roof and arched openings on the left, a big magnolia on the far left, a hedge with an iron gate, a young tree on the right) on a sunny morning. Composition for a 2D beat-em-up: the lower third of the image is a flat open band of mown grass with a straight concrete path crossing it (slight perspective so characters can walk up and down in depth), completely empty of people, objects and shadows. The house, barn, hedge and trees sit in the middle distance, blue sky above. Everything hand-drawn and cel-shaded with clean outlines, flat colours, readable shapes, no fine noisy detail. No text, no people, no animals on the ground."
+  },
+  {
+   "out": "out/woods_arena_v1.png",
+   "refs": [
+    "refs/ready/hazelnut_orchard.jpg"
+   ],
+   "prompt": "Side-scrolling fighting-game arena background based on the reference photo: an avenue between two rows of young hazelnut trees in a Veneto orchard, late morning sun with long shadows between the rows, a hazy blue sky with thin cirrus. Composition for a 2D beat-em-up: the lower third of the image is a flat open band of mown grass down the central alley (slight perspective so characters can walk up and down in depth), completely empty of people, objects and shadows. Rows of hazelnut trees recede on both sides toward a far vanishing point, a single old tractor tyre at the base of one tree, a red-and-white striped marker stake on the right. Slightly moody, a few peacock feathers drifting in the air for foreshadowing. Everything hand-drawn and cel-shaded with clean outlines, flat colours, readable shapes, no fine noisy detail. No text, no people, no animals on the ground."
+  },
+  {
+   "out": "out/nonna_boss_v1.png",
+   "refs": [
+    "out/jin_turnaround_v2.png",
+    "refs/ready/nonna_dining_room.jpg"
+   ],
+   "prompt": "Boss sprite sheet for the first boss, NONNA, an Italian grandmother. The first reference image is the sheet of a playable fighter in this game: match its art style, line weight, label style and white background, but draw Nonna about one and a half times his height, stocky and solid. The second reference image is her dining room, for the feel of her world only, do not draw the room. Nonna: short round elderly woman, grey hair in a tight bun, small round glasses on a chain, stern eyebrows, rosy cheeks, a floral house dress with a flour-dusted apron, slippers, a wooden spoon in her right hand and a stack of ceramic plates in her left. Plain flat solid white background, no floor, no shadows. Two rows of full-body figures at identical scale, side view facing LEFT, each with a small plain capital label underneath. Row 1: IDLE, WALK 1, WALK 2, ATTACK (wooden spoon swing, motion arc). Row 2: THROW (flinging a plate forward), SPECIAL (hurling a steaming pot of bolognese, red sauce arcing), HURT (leaning back, glasses askew), DEFEATED (sitting on the ground, dazed, spoon dropped, little stars)."
+  },
+  {
+   "out": "out/peacock_boss_v1.png",
+   "refs": [
+    "out/jin_turnaround_v2.png",
+    "refs/ready/peacocks_pen.jpg"
+   ],
+   "prompt": "Boss sprite sheet for the second boss, THE PEACOCK. The first reference image is the sheet of a playable fighter in this game: match its art style, line weight, label style and white background, but draw the peacock about one and a half times his height. The second reference image shows the real peafowl that live on the farm, use them for the body shape, then exaggerate: a huge arrogant male peacock with an iridescent teal-blue neck and chest, a small crown crest, a long train of green eye-spotted feathers, grey scaly legs with sharp claws, a sneering beak. Plain flat solid white background, no floor, no shadows. Two rows of full-body figures at identical scale, side view facing LEFT, each with a small plain capital label underneath. Row 1: IDLE (train folded), WALK 1, WALK 2, ATTACK (lunging peck, motion lines). Row 2: THROW (flicking three sharp feathers forward), SPECIAL (full tail fan display, dazzling flash lines around it), HURT (feathers ruffled, eyes shut), DEFEATED (lying on its back, legs up, tail drooping, little stars)."
+  },
+  {
+   "out": "out/martino_boss_v1.png",
+   "refs": [
+    "out/jin_turnaround_v2.png",
+    "refs/ready/dog.jpg"
+   ],
+   "prompt": "Boss sprite sheet for the final boss, MONSTER MARTINO, and his true form TINO. The first reference image is the sheet of a playable fighter in this game: match its art style, line weight, label style and white background. The second reference image is the real dog: a small cream-coloured chihuahua mix with big upright ears, dark round eyes, a pinkish-red collar and a worried face. MONSTER MARTINO is this exact dog transformed by a curse: about twice the fighter's height, hulking and muscular on two legs, glowing red eyes, fangs, tattered dark cape, but unmistakably the same cream chihuahua face and big ears, slightly ridiculous. Plain flat solid white background, no floor, no shadows. Two rows of figures, side view facing LEFT, each with a small plain capital label underneath. Row 1 (monster, large scale): IDLE, WALK 1, WALK 2, ATTACK (big claw swipe, motion arc). Row 2: SPECIAL (howling, three red shockwave rings), HURT (recoiling, eyes shut), DEFEATED (collapsed on the ground, cape in tatters, puff of smoke), and finally TINO (the small normal cute chihuahua at his real tiny size, sitting, tail wagging, hearts above his head)."
+  },
+  {
+   "out": "out/carlos_turnaround_v1.png",
+   "refs": [
+    "refs/ready/carlos_full.jpg",
+    "out/jin_turnaround_v2.png"
+   ],
+   "prompt": "Character sprite sheet for a playable fighter named CARLOS. The first reference image is a photo of the real person: turn him into a stylised game character that is clearly recognisable (dark hair slicked back, short dark beard and moustache, big warm smile, athletic build, a black smartwatch on his left wrist), warm and heroic, not mocking; ignore the wrist bandage. The second reference image is the finished sheet of another fighter in the same game: match its art style, line weight, scale, proportions, layout, label style and framing exactly; this is a different person, do not copy his face or clothes. CARLOS is a Latino grill master and fights with a long metal picanha skewer loaded with three chunks of juicy grilled meat, held in his right hand like a spear, grill tongs in his left hand. Outfit: a dark leather grilling apron over a sand-coloured short-sleeved tee like in the photo, black trousers, boots, a kitchen towel over one shoulder. Plain flat solid white background, no floor, no shadows. Row 1, turnaround: FRONT, THREE-QUARTER, SIDE, BACK in the same relaxed fighting stance. Row 2, side view facing right: IDLE, WALK 1, WALK 2, ATTACK (skewer jab forward, two motion lines and a drop of juice), SPECIAL (zone: he plants a small round charcoal grill on the ground in front of him, orange embers and smoke rising, heat lines around it), HURT (leaning back, eyes shut, meat chunks flying off the skewer). Small plain capital labels under each figure."
+  }
+ ]
+}
