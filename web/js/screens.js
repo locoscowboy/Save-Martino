@@ -74,13 +74,16 @@ window.RMScreens = (function () {
 
     // each scene returns one { panel, cap, onShow } per story line, in order
     const SCENES = {
+      // two pages of two tall panels: page 1 Tino and the glasses, page 2 Monster Martino (highlighted) and Nonna
       prologue(st, s) {
-        const a = panel(st, 14, 14, 560, 250, { bg: 'farm' }); put(a, 'martino', 'tino', .5, 280, 238);
-        const b = panel(st, 588, 14, 358, 250, { cls: 'dark speed' }); b.style.background = 'radial-gradient(circle at 50% 55%, #4ff3ff, #0b3a52 60%, #071018)'; const bt = put(b, 'martino', 'tino', .46, 180, 238); bt.style.filter = 'drop-shadow(0 0 10px #5ff)'; sfx(b, 'BZZT!', 210, 24, 48, '#7ff');
-        const c = panel(st, 14, 278, 420, 248, { cls: 'speed' }); c.style.background = 'radial-gradient(circle, #ff6a4a, #6a0f08)'; put(c, 'martino', 'hero', .5, 210, 248); sfx(c, 'GRRR!', 18, 20, 52);
-        const d = panel(st, 448, 278, 498, 248, { bg: 'farm' }); put(d, 'nonna', 'attack', .55, 300, 246); sfx(d, '!!', 40, 20, 64, '#ff5a3a');
-        return [{ panel: a, cap: cap(st, 26, 200, s.lines[0], 520) }, { panel: b, cap: cap(st, 600, 196, s.lines[1], 330) },
-          { panel: c, cap: cap(st, 26, 518, s.lines[2], 400, true) }, { panel: d, cap: cap(st, 462, 518, s.lines[3], 470, true) }];
+        if (!s.page) {
+          const a = panel(st, 14, 14, 520, 512, { bg: 'farm' }); put(a, 'martino', 'tino', .7, 260, 500);
+          const b = panel(st, 548, 14, 398, 512, { cls: 'dark speed' }); b.style.background = 'radial-gradient(circle at 50% 55%, #4ff3ff, #0b3a52 60%, #071018)'; const bt = put(b, 'martino', 'tino', .66, 200, 500); bt.style.filter = 'drop-shadow(0 0 10px #5ff)'; sfx(b, 'BZZT!', 230, 90, 56, '#7ff');
+          return [{ panel: a, cap: cap(st, 26, 26, s.lines[0], 490) }, { panel: b, cap: cap(st, 560, 26, s.lines[1], 370) }];
+        }
+        const c = panel(st, 14, 14, 520, 512, { cls: 'speed mg-hl' }); c.style.background = 'radial-gradient(circle, #ff6a4a, #6a0f08)'; put(c, 'martino', 'hero', .8, 260, 500); sfx(c, 'GRRR!', 24, 90, 64);
+        const d = panel(st, 548, 14, 398, 512, { bg: 'farm' }); put(d, 'nonna', 'attack', .7, 200, 500); sfx(d, '!!', 30, 90, 72, '#ff5a3a');
+        return [{ panel: c, cap: cap(st, 26, 26, s.lines[0], 490) }, { panel: d, cap: cap(st, 560, 26, s.lines[1], 370) }];
       },
       woods(st, s) {
         const a = panel(st, 14, 14, 932, 250, { bg: 'woods' }); const m = put(a, 'martino', 'walk1', .22, 760, 200, true); m.style.filter = 'brightness(0)'; sfx(a, '...?', 700, 40, 36, '#fff');
@@ -131,21 +134,16 @@ window.RMScreens = (function () {
       }
       const st = open(key, 'mg');
       const scene = SCENES[sto.scene] || SCENES[SCENE_BY_ACT[sto.act]] || SCENES.prologue;
-      // a card split into pages: the panels of earlier pages are already on screen and fully written, this page's lines are timed
-      const off = sto.offset || 0;
-      // beats before this page are shown at once but dimmed, this page's beats are timed, later pages' beats stay hidden
-      const count = (sto.lines || []).length || 1;
-      refs.beats = scene(st, { ...sto, lines: sto.allLines || sto.lines }, s).map((b, i) => ({ ...b, shown: i < off, pre: i < off, later: i >= off + count, idx: i - off }));
-      refs.beats.forEach(b => { if (b.pre) { b.panel.classList.add('on', 'done'); b.cap.classList.add('on', 'done'); b.cap.querySelectorAll('.c').forEach(c => c.classList.add('v')); } });
+      // a card split into pages draws only this page: the scene gets the page number and this page's lines
+      refs.beats = scene(st, sto, s).map((b, i) => ({ ...b, shown: false, idx: i }));
       refs.sto = sto; refs.base = { server: s.t, local: performance.now() };
     }
     function storyUpdate(s, fresh) {
       if (!refs.beats) return;
       if (fresh) refs.base = { server: s.t, local: performance.now() };
       const sto = refs.sto, now = (refs.base.server - sto.start) + (performance.now() - refs.base.local) / 1000;
-      const dur = sto.until - sto.start, n = Math.max(1, refs.beats.filter(b => !b.pre && !b.later).length), step = Math.max(1.6, (dur - 3) / n);
+      const dur = sto.until - sto.start, n = Math.max(1, refs.beats.length), step = Math.max(1.6, (dur - 3) / n);
       refs.beats.forEach((b) => {
-        if (b.pre || b.later) return;
         const t0 = 0.4 + b.idx * step;
         if (now >= t0 && !b.shown) { b.shown = true; b.panel.classList.add('on'); b.cap.classList.add('on'); if (b.onShow) b.onShow(); }
         if (b.shown) { const cs = b.cap.querySelectorAll('.c'), vis = Math.floor((now - t0 - .25) / 0.028); cs.forEach((c, k) => c.classList.toggle('v', k < vis)); }

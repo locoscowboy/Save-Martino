@@ -27,7 +27,7 @@ export class Room {
     const c = this.roster.find(r => r.id === char) || this.roster[0];
     const n = this.players.size;
     this.players.set(id, { id, name, char: c.id, mechanic: c.mechanic || 'burst', x: 160 + n * 60, y: 380 + (n % 3) * 40,
-      facing: 1, anim: 'idle', hp: PLAYER.hp, cd: 0, deaths: 0, dmg: 0, invuln: 0, down: 0, attackT: 0, dashT: 0, dashId: 0, ready: false });
+      facing: 1, anim: 'idle', hp: PLAYER.hp, cd: 0, deaths: 0, dmg: 0, invuln: 0, down: 0, attackT: 0, dashT: 0, dashId: 0, swings: 0, ready: false });
     this.inputs.set(id, { dx: 0, dy: 0, attack: false, special: false, _a: false, _s: false });
     if (!this.hostId) this.hostId = id;
     this.lastActivity = Date.now();
@@ -67,7 +67,7 @@ export class Room {
   }
   // kind: 'act' before each boss, 'ending' after the last one (then results), 'retry' after a wipe
   // page: a card can be split into pages ({ lines: n, seconds }) so a long card is read in parts; lines holds the page's
-  // lines, allLines the whole card (the watch page keeps earlier pages' panels on screen) and offset where the page starts.
+  // lines (the watch page draws only that page's panels), allLines the whole card and offset where the page starts.
   beginStory(kind = 'act', page = 0) {
     const card = this.script.story[this.act] || { text: '' };
     const all = card.lines || (card.text ? [card.text] : []);
@@ -145,14 +145,14 @@ export class Room {
       p.anim = 'walk';
     } else p.anim = 'idle';
     if (inp.attack) {
-      inp.attack = false; p.anim = 'attack'; p.attackT = 0.25;
+      inp.attack = false; p.anim = 'attack'; p.attackT = 0.25; p.swings += 1; // swings: every press counts, so the renderer replays the lunge on each one
       const reach = { x: p.x + p.facing * PLAYER.attackReach / 2, y: p.y };
       this.hitBossIf(p, this.boss && near(reach, this.boss, PLAYER.attackReach / 2 + this.boss.def.w / 2), PLAYER.attackDmg);
     }
     if (inp.special) {
       inp.special = false;
       if (p.cd <= 0) {
-        const m = MECHANICS[p.mechanic] || MECHANICS.burst; p.cd = m.cooldown; p.anim = 'special'; p.attackT = 0.3;
+        const m = MECHANICS[p.mechanic] || MECHANICS.burst; p.cd = m.cooldown; p.anim = 'special'; p.attackT = 0.3; p.swings += 1;
         if (p.mechanic === 'burst') for (let i = 0; i < m.count; i++) this.spawn({ kind: this.roster.find(r => r.id === p.char)?.projectile || 'baguette', x: p.x + p.facing * 30, y: p.y + (i - 1) * 18, vx: p.facing * m.speed, vy: 0, owner: p.id, dmg: m.dmg, ttl: 2 });
         if (p.mechanic === 'slam') this.hitBossIf(p, this.boss && Math.hypot(p.x - this.boss.x, p.y - this.boss.y) < m.radius + this.boss.def.w / 2, m.dmg);
         if (p.mechanic === 'dash') { p.dashT = 0.25; p.invuln = 0.4; p.dashId = this.nextId++; }
@@ -259,7 +259,7 @@ export class Room {
   // ---------- output ----------
   snapshot() {
     const players = {};
-    for (const p of this.players.values()) players[p.id] = { name: p.name, char: p.char, x: Math.round(p.x), y: Math.round(p.y), facing: p.facing, anim: p.anim, hp: p.hp, cd: Math.round(p.cd * 10) / 10, cdMax: (MECHANICS[p.mechanic] || MECHANICS.burst).cooldown, deaths: p.deaths, dmg: p.dmg, ready: p.ready, down: p.down > 0 ? Math.ceil(p.down) : 0, downT: p.down > 0 ? Math.round(p.down * 10) / 10 : 0 };
+    for (const p of this.players.values()) players[p.id] = { name: p.name, char: p.char, x: Math.round(p.x), y: Math.round(p.y), facing: p.facing, anim: p.anim, swings: p.swings, hp: p.hp, cd: Math.round(p.cd * 10) / 10, cdMax: (MECHANICS[p.mechanic] || MECHANICS.burst).cooldown, deaths: p.deaths, dmg: p.dmg, ready: p.ready, down: p.down > 0 ? Math.ceil(p.down) : 0, downT: p.down > 0 ? Math.round(p.down * 10) / 10 : 0 };
     const b = this.boss;
     return {
       t: Math.round(this.t * 100) / 100, room: this.code, respawn: PLAYER.respawn, code: this.code, host: this.hostId, maxPlayers: MAX_PLAYERS, maxHp: PLAYER.hp, canStart: this.canStart(),

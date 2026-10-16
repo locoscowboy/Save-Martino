@@ -111,7 +111,7 @@ window.SaveMartino = (function () {
           if (e.t === 'hurt') { const v = f(e.id); v.flashUntil = now + 110; v.hurtAt = now; this.cameras.main.shake(130, 0.006); }
           if (e.t === 'squash') { // a swing: wind back, lunge, and a crescent in front of the weapon
             const v = f(e.id), p = s.players[e.id]; v.squashUntil = now + 70; v.atkAt = now; v.atkKind = e.kind;
-            if (p) slash(p.x + p.facing * 34, p.y - 52, p.facing, e.kind === 'special' ? COLORS[p.char] || 0xffffff : 0xfff6e0, e.kind === 'special' ? 1.35 : 1);
+            if (p) slash(p.x + p.facing * 34, p.y - (e.n % 2 ? 40 : 56), p.facing, e.kind === 'special' ? COLORS[p.char] || 0xffffff : 0xfff6e0, e.kind === 'special' ? 1.35 : 1);
             if (e.kind === 'special') punch(1.03);
           }
           if (e.t === 'shake') this.cameras.main.shake(250, 0.008);
@@ -288,7 +288,8 @@ window.SaveMartino = (function () {
       for (const [id, p] of Object.entries(b.players)) {
         const q = a.players[id]; if (!q) continue;
         if (p.hp < q.hp && q.anim !== 'down') fxq.push({ t: 'hurt', id });
-        if (p.anim !== q.anim && (p.anim === 'attack' || p.anim === 'special')) fxq.push({ t: 'squash', id, kind: p.anim });
+        // a new swing: the pose changed, or the swing count went up while the pose stayed on attack (mashing)
+        if ((p.anim !== q.anim || p.swings !== q.swings) && (p.anim === 'attack' || p.anim === 'special')) fxq.push({ t: 'squash', id, kind: p.anim, n: p.swings || 0 });
         if (q.anim === 'down' && p.anim !== 'down') fxq.push({ t: 'back', id });
       }
       if (fxq.length > 40) fxq.splice(0, fxq.length - 40);
@@ -328,6 +329,7 @@ window.SaveMartino = (function () {
         }
         for (const [id, p] of Object.entries(b.players)) {
           const q = a.players[id]; if (!q) continue;
+          if (p.anim === 'attack' && p.anim === q.anim && p.swings !== q.swings) play(p.char + '_attack', { volume: 0.8, min: 100 }); // mashing keeps the pose, so count swings
           if (p.anim !== q.anim) {
             if (p.anim === 'attack') play(p.char + '_attack', { volume: 0.8, min: 100 });
             if (p.anim === 'special') play(p.char + '_special', { volume: 0.8 });
