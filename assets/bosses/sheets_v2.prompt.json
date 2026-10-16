@@ -1,0 +1,26 @@
+{
+ "model": "gemini-3-pro-image",
+ "aspect": "16:9",
+ "size": "2K",
+ "look": "Art direction: the visual language of the 2D fighting game Little Fighter 2. Hand-drawn pixel-art look with crisp black outlines, flat cel colours with one darker shadow tone and one highlight, slightly chunky proportions (about five and a half heads tall for humans), readable at small size. No photorealism, no soft gradients, no blur, no text other than the labels asked for, no logos of real brands, no watermark.",
+ "jobs": [
+  {
+   "out": "out/nonna_boss_v2.png",
+   "refs": [
+    "refs/faces/nonna_face.jpg",
+    "refs/ready/nonna_full.jpg",
+    "out/jin_turnaround_v2.png"
+   ],
+   "prompt": "Boss sprite sheet for the first boss, NONNA, who is a real person. The first reference image is a close-up of her face and the second a photo of her: study them like a caricature artist and keep her exact likeness: a slim, energetic woman in her sixties, SHORT straight dark-brown hair in a layered, slightly tousled cut with a feathered fringe (NOT grey, NOT a bun), a narrow face with high cheekbones and laugh lines, dark eyebrows, a huge warm open smile showing her teeth, small gold earrings, red nail polish. Exaggerate the hair shape and the smile a little so she is recognisable at a glance. The third reference image is the sheet of a playable fighter in this game: match its art style, line weight, label style and white background, but draw Nonna about one and a third times his height, slim and quick, not stocky. Outfit: her bright ORANGE fleece zip jacket with black side panels, worn under a flour-dusted white apron, black trousers, house slippers; a wooden spoon in her right hand and a stack of ceramic plates in her left. She is sweet-looking but deadly. Plain flat solid white background, no floor, no shadows. Two rows of full-body figures at identical scale, side view facing LEFT, each with a small plain capital label underneath. Row 1: IDLE, WALK 1, WALK 2, ATTACK (wooden spoon swing, motion arc). Row 2: THROW (flinging a plate forward), SPECIAL (hurling a steaming pot of bolognese, red sauce arcing), HURT (leaning back, hair flying), DEFEATED (sitting on the ground, dazed but still smiling, spoon dropped, little stars). Exactly eight figures."
+  },
+  {
+   "out": "out/martino_boss_v2.png",
+   "refs": [
+    "refs/ready/dog.jpg",
+    "out/martino_boss_v1.png",
+    "out/jin_turnaround_v2.png"
+   ],
+   "prompt": "Boss sprite sheet for the final boss, MONSTER MARTINO, and his true form TINO. The first reference image is the real dog: a small cream-coloured chihuahua mix with big upright ears, dark round eyes, a pinkish-red collar and a worried face. The second reference image is the previous version of this exact sheet: keep the same character design, poses, layout, scale and labels, and change ONE thing: in every monster pose he wears a pair of sleek futuristic AI SMART GLASSES, a thin black wraparound visor frame with glowing cyan lenses and a tiny blinking red camera light at the temple, clearly visible on his face, because the glasses are what turned him into a monster. The third reference image is the sheet of a playable fighter in this game: match its art style, line weight, label style and white background. MONSTER MARTINO: this exact dog transformed, about twice the fighter's height, hulking and muscular on two legs, glowing eyes behind the visor, fangs, tattered dark cape, unmistakably the same cream chihuahua face and big ears, slightly ridiculous. Plain flat solid white background, no floor, no shadows. Two rows of figures, side view facing LEFT, each with a small plain capital label underneath. Row 1 (monster, large scale): IDLE, WALK 1, WALK 2, ATTACK (big claw swipe, motion arc). Row 2: SPECIAL (howling, three cyan shockwave rings coming from the glasses), HURT (recoiling, eyes shut, glasses askew), DEFEATED (collapsed on the ground, cape in tatters, the smart glasses lying on the ground beside him cracked and dark, puff of smoke), and finally TINO (the small normal cute chihuahua at his real tiny size, no glasses, sitting, tail wagging, hearts above his head). Exactly eight figures."
+  }
+ ]
+}
