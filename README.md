@@ -68,6 +68,8 @@ To make the Netlify site use it, put the URL in `SERVER_URL` in `web/js/config.j
 
 Free instances sleep after 15 minutes without requests and take about a minute to wake up: open the watch page a few minutes before the guests arrive. An open watch page pings the server every 5 minutes to keep it awake.
 
+The blueprint pins the region to Frankfurt; a service created in Oregon (Render's default) adds about 200 ms to every input from Europe, and a region cannot be changed afterwards: delete the service and apply the blueprint again. If the broadcast still stutters on the free plan (shared CPU), the Starter plan is the next step, not Pro.
+
 ### At the venue: the server on a laptop
 
 Lower latency and no dependence on the venue's internet: `cd server && npm start` on the TV laptop, then the LAN URLs from "Run locally". To reach that laptop through the Netlify site instead (HTTPS pages need a `wss://` socket):
