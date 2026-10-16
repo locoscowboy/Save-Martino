@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<link rel="icon" href="data:,">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="mobile-web-app-capable" content="yes">
 <title>Save Martino · controller</title>
@@ -15,8 +16,9 @@
   button { font-weight: 700; } button:disabled { opacity: 0.4; }
   button.primary { background: #d23a2c; border-color: #d23a2c; } button.ok { background: #2e8b57; border-color: #2e8b57; } button.gold { background: #d9a030; border-color: #d9a030; color: #1a0d0b; }
   .chars { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; width: min(90vw, 420px); margin: 0 auto; }
-  .char { padding: 10px; border-radius: 8px; border: 2px solid #2e3e47; background: #1a252c; cursor: pointer; display: grid; gap: 2px; text-align: left; }
+  .char { padding: 8px 10px; border-radius: 8px; border: 2px solid #2e3e47; background: #1a252c; cursor: pointer; display: grid; grid-template-columns: 40px 1fr; gap: 8px; align-items: center; text-align: left; }
   .char.sel { border-color: #3db5b0; } .char b { font-size: 1rem; } .char small { color: #9fb1b6; font-size: 0.75rem; }
+  .char img { height: 56px; width: 40px; object-fit: contain; object-position: bottom; } .char div { display: grid; gap: 2px; }
   .modes { display: grid; gap: 8px; }
   #joinBox { display: grid; gap: 8px; } #joinBox[hidden] { display: none; }
   #code { text-transform: uppercase; letter-spacing: 0.3em; text-align: center; font-weight: 700; }
@@ -90,7 +92,7 @@
     roster = list; const host = $('chars');
     list.filter(c => !c.backup).forEach((c, i) => { // backup characters wait until their mechanic exists on the server
       const d = document.createElement('div'); d.className = 'char' + (i === 0 ? ' sel' : ''); if (i === 0) char = c.id;
-      d.innerHTML = `<b>${c.name}</b><small>${c.label || ''}</small><small>${c.special.split(':')[0]}</small>`;
+      d.innerHTML = `<img src="${base}/assets/sprites/${c.id}_front.png" alt=""><div><b>${c.name}</b><small>${c.label || ''}</small><small>${c.special.split(':')[0]}</small></div>`;
       d.addEventListener('click', () => { document.querySelectorAll('.char').forEach(x => x.classList.remove('sel')); d.classList.add('sel'); char = c.id; });
       host.appendChild(d);
     });

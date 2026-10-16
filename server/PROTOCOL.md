@@ -36,13 +36,13 @@ A game is a room keyed by a 4-letter code (no I or O). The first phone in is the
   "act": 0,
   "story": {"text": "...", "until": 130.0},
   "players": {"<socketId>": {"name": "Jin", "char": "jin", "x": 200, "y": 400, "facing": 1, "anim": "idle|walk|attack|special|hurt|down", "hp": 3, "cd": 0.0, "deaths": 0, "dmg": 120, "ready": true, "down": 0}},
-  "boss": {"id": "nonna", "name": "Nonna", "x": 700, "y": 410, "facing": -1, "hp": 300, "maxHp": 300, "anim": "idle|windup|attack|hurt|dead", "phase": 1, "say": {"text": "...", "until": 140.0}, "arena": "farm"},
+  "boss": {"id": "nonna", "name": "Nonna", "x": 700, "y": 410, "facing": -1, "hp": 300, "maxHp": 300, "anim": "intro|idle|walk|windup|attack|hurt|dead", "move": "pizza", "phase": 1, "w": 90, "h": 150, "say": {"text": "...", "until": 140.0}, "arena": "farm"},
   "projectiles": [{"id": 1, "kind": "pizza|bolognese|plate|feather|pigeon|baguette|chopstick|splash|om|ember|grill", "x": 500, "y": 400, "h": 0, "owner": "boss|player"}],
   "clock": 45.2, "wipes": 0,
   "result": {"time": 180.4, "deaths": 2, "wipes": 0, "mvp": "Jin"}
 }
 ```
 
-`h` is height above the ground for arcing projectiles; everything collides on (x, y) with a depth tolerance of 28 px. `down` is the seconds left before a downed player gets back up. `windup` is the telegraph before a charge or lunge.
+`h` is height above the ground for arcing projectiles; everything collides on (x, y) with a depth tolerance of 28 px. `down` is the seconds left before a downed player gets back up. The boss strikes an `intro` pose for 2 s when it appears, `windup` is the telegraph before a charge or lunge, and `move` names the pattern behind the current `attack` (pizza, bolognese, plates, feather, charge, screech, lunge, howl, pigeons) so the renderer can pick the pose.
 
 When every player is down at once the room goes back to `story` for a few seconds (the retry card) and the boss comes back at its last checkpoint: full hp, or half if phase 2 had been reached. `wipes` counts those.

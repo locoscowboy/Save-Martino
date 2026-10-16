@@ -71,7 +71,7 @@ export class Room {
     } else {
       const def = BOSSES[this.act], lines = this.script.bosses[def.id] || {};
       const hp = Math.round(def.hp * clamp(this.players.size / MAX_PLAYERS, 0.25, 1)); // smaller teams face a softer boss; solo takes all the fire
-      this.boss = { def, id: def.id, name: def.name, x: 760, y: 410, facing: -1, hp, maxHp: hp, anim: 'idle', phase: 1,
+      this.boss = { def, id: def.id, name: def.name, x: 760, y: 410, facing: -1, hp, maxHp: hp, anim: 'intro', phase: 1, introT: 2, attackT: 0, move: null,
         timers: {}, say: { text: lines.intro || '', until: this.t + 3 }, lines, hurtT: 0, charge: null, windup: null, saidHalf: false, lastDashHit: 0 };
     }
     let n = 0;
@@ -164,7 +164,9 @@ export class Room {
 
   stepBoss(dt) {
     const b = this.boss; if (!b || b.anim === 'dead') return;
+    if (b.introT > 0) { b.introT -= dt; b.anim = 'intro'; return; } // strikes a pose while its intro line shows
     if (b.hurtT > 0) { b.hurtT -= dt; if (b.hurtT <= 0) b.anim = 'idle'; }
+    if (b.attackT > 0) { b.attackT -= dt; if (b.attackT <= 0 && b.anim === 'attack') b.anim = 'idle'; }
     const targets = [...this.players.values()].filter(p => p.down <= 0);
     const target = targets[Math.floor(this.t / 2) % Math.max(1, targets.length)];
     if (b.windup) { // telegraph: the boss stands still and shakes, then charges
@@ -181,11 +183,12 @@ export class Room {
     if (target) { // drift toward the target's depth, keep distance
       b.y += clamp(target.y - b.y, -1, 1) * b.def.speed * dt;
       b.facing = target.x < b.x ? -1 : 1;
+      if (b.anim === 'idle' || b.anim === 'walk') b.anim = Math.abs(target.y - b.y) > 6 ? 'walk' : 'idle';
     }
     for (const pat of b.def.patterns[b.phase]) {
       b.timers[pat.kind] = (b.timers[pat.kind] ?? pat.every * 0.6) + dt;
       if (b.timers[pat.kind] < pat.every || !target) continue;
-      b.timers[pat.kind] = 0; b.anim = 'attack';
+      b.timers[pat.kind] = 0; b.anim = 'attack'; b.attackT = 0.45; b.move = pat.kind; // move lets the renderer pick the pose
       this.fire(pat, b, target);
     }
   }
@@ -244,7 +247,7 @@ export class Room {
       phase: this.phase, act: this.act,
       story: this.phase === 'story' ? this.story : null,
       players,
-      boss: b ? { id: b.id, name: b.name, x: Math.round(b.x), y: Math.round(b.y), facing: b.facing, hp: Math.max(0, b.hp), maxHp: b.maxHp, anim: b.anim, phase: b.phase, w: b.def.w, h: b.def.h, say: b.say && b.say.until > this.t ? b.say : null, arena: b.def.arena } : null,
+      boss: b ? { id: b.id, name: b.name, x: Math.round(b.x), y: Math.round(b.y), facing: b.facing, hp: Math.max(0, b.hp), maxHp: b.maxHp, anim: b.anim, move: b.move, phase: b.phase, w: b.def.w, h: b.def.h, say: b.say && b.say.until > this.t ? b.say : null, arena: b.def.arena } : null,
       projectiles: this.projectiles.map(pr => ({ id: pr.id, kind: pr.kind, x: Math.round(pr.x), y: Math.round(pr.y), h: Math.round(pr.h || 0), owner: pr.owner === 'boss' ? 'boss' : 'player' })),
       clock: Math.round(this.clock * 10) / 10, wipes: this.wipes, result: this.result, stunned: this.t < this.stunUntil
     };
