@@ -1,0 +1,140 @@
+{
+ "frames": {
+  "plate": {
+   "frame": {
+    "x": 0,
+    "y": 0,
+    "w": 75,
+    "h": 37
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 75,
+    "h": 37
+   },
+   "sourceSize": {
+    "w": 75,
+    "h": 37
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.5
+   },
+   "facing": 1
+  },
+  "feather": {
+   "frame": {
+    "x": 77,
+    "y": 0,
+    "w": 110,
+    "h": 25
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 110,
+    "h": 25
+   },
+   "sourceSize": {
+    "w": 110,
+    "h": 25
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.5
+   },
+   "facing": 1
+  },
+  "baguette": {
+   "frame": {
+    "x": 189,
+    "y": 0,
+    "w": 60,
+    "h": 68
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 60,
+    "h": 68
+   },
+   "sourceSize": {
+    "w": 60,
+    "h": 68
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.5
+   },
+   "facing": 1
+  },
+  "sauce": {
+   "frame": {
+    "x": 251,
+    "y": 0,
+    "w": 70,
+    "h": 60
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 70,
+    "h": 60
+   },
+   "sourceSize": {
+    "w": 70,
+    "h": 60
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.5
+   },
+   "facing": 1
+  },
+  "grill": {
+   "frame": {
+    "x": 323,
+    "y": 0,
+    "w": 180,
+    "h": 290
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 180,
+    "h": 290
+   },
+   "sourceSize": {
+    "w": 180,
+    "h": 290
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 1
+   },
+   "facing": 1
+  }
+ },
+ "meta": {
+  "app": "save-martino cut-sheets",
+  "image": "props.png",
+  "size": {
+   "w": 503,
+   "h": 290
+  },
+  "scale": "1",
+  "facing": 1,
+  "idle": null
+ }
+}
