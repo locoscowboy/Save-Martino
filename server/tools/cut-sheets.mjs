@@ -14,6 +14,15 @@ const OUT = path.join(ROOT, 'assets', 'sprites');
 const WHITE = 232;       // a pixel whose darkest channel is above this is background
 const PAD = 3, GAP = 2, MAX_W = 4096;
 
+// Projectiles and props, cut from detached pieces of the sheets (at: a point inside the piece) or from a box (fade: alpha
+// ramp on the left edge where the box cuts through the drawing). width: target width in the atlas, 2.5x the in-game size.
+const PROPS = [
+  { name: 'plate', sheet: 'nonna', at: [643, 977], width: 75 },
+  { name: 'feather', sheet: 'peacock', at: [694, 1098], width: 110 },
+  { name: 'baguette', sheet: 'quentin', at: [2120, 977], width: 60 },
+  { name: 'sauce', sheet: 'nonna', box: [1350, 930, 1510, 1065], fade: 30, width: 70 },
+  { name: 'grill', sheet: 'carlos', box: [2050, 1150, 2250, 1475], fade: 40, width: 180, pivot: { x: 0.5, y: 1 } },
+];
 const CHAR_ROWS = [['front', 'threequarter', 'side', 'back'], ['idle', 'walk1', 'walk2', 'attack', 'special', 'hurt']];
 const BOSS_ROWS = [['idle', 'walk1', 'walk2', 'attack'], ['throw', 'special', 'hurt', 'defeated']];
 // idle: target height of the idle frame in the atlas (2.5× the in-game size, crisp on a 1080p TV). facing: which way row 2 looks.
@@ -21,9 +30,10 @@ const SHEETS = [
   ...['euge', 'quentin', 'jin', 'oriana'].map(id => ({ id, file: `characters/${id}_sheet.png`, rows: CHAR_ROWS, idle: 240, facing: 1, portraits: ['front'] })),
   { id: 'carlos', file: 'characters/carlos_sheet.png', rows: CHAR_ROWS, idle: 240, facing: 1, portraits: ['front'], holes: { threequarter: [[0.74, 0.65]] } },
   { id: 'bricciola', file: 'characters/bricciola_sheet.png', rows: [['front', 'threequarter', 'side', 'side2', 'back'], CHAR_ROWS[1]], idle: 240, facing: -1, portraits: ['front'] },
-  { id: 'nonna', file: 'bosses/nonna_sheet.png', rows: BOSS_ROWS, idle: 375, facing: -1 },
-  { id: 'peacock', file: 'bosses/peacock_sheet.png', rows: BOSS_ROWS, idle: 400, facing: -1, holes: { idle: [[0.29, 0.87]] } },
-  { id: 'martino', file: 'bosses/martino_sheet.png', rows: [['hero', 'idle', 'walk1', 'walk2', 'attack'], ['special', 'hurt', 'defeated', 'tino']], idle: 425, facing: -1, portraits: ['hero', 'tino'] },
+  // the generated boss sheets look left at rest and right for most actions: frameFacing says which pose looks which way
+  { id: 'nonna', file: 'bosses/nonna_sheet.png', rows: BOSS_ROWS, idle: 375, facing: -1, frameFacing: { attack: 1, throw: 1, special: 1, hurt: 1, defeated: 1 } },
+  { id: 'peacock', file: 'bosses/peacock_sheet.png', rows: BOSS_ROWS, idle: 400, facing: -1, frameFacing: { attack: 1, hurt: 1, defeated: 1 }, holes: { idle: [[0.29, 0.87]] } },
+  { id: 'martino', file: 'bosses/martino_sheet.png', rows: [['hero', 'idle', 'walk1', 'walk2', 'attack'], ['special', 'hurt', 'defeated', 'tino']], idle: 425, facing: -1, frameFacing: { attack: 1, special: 1, hurt: 1, defeated: 1, tino: 1 }, portraits: ['hero', 'tino'] },
 ];
 
 async function readImage(file) { const { data, info } = await sharp(file).ensureAlpha().raw().toBuffer({ resolveWithObject: true }); return { width: info.width, height: info.height, data }; }
@@ -90,7 +100,24 @@ function cutSheet(def, img) {
     if (process.env.DEBUG && c.area > 150) console.log(`    ${c.w}×${c.h} piece at ${c.x0},${c.y0} (area ${c.area}) → ${bf.name} (d=${Math.round(bd)})`);
     bf.ids.add(c.id); bf.x0 = Math.min(bf.x0, c.x0); bf.x1 = Math.max(bf.x1, c.x1); bf.y0 = Math.min(bf.y0, c.y0); bf.y1 = Math.max(bf.y1, c.y1);
   }
-  return figs.map(f => { if (process.env.HOLES) console.log(`    ${f.name}`); return { name: f.name, ...crop(img, label, f, (def.holes || {})[f.name], `${def.id}/${f.name}`) }; });
+  const frames = figs.map(f => { if (process.env.HOLES) console.log(`    ${f.name}`); return { name: f.name, ...crop(img, label, f, (def.holes || {})[f.name], `${def.id}/${f.name}`) }; });
+  return { frames, img, label, comps };
+}
+
+// One projectile or prop: the component under `at`, or everything inside `box`.
+function cutProp(def, { img, label, comps }) {
+  let fig;
+  if (def.at) {
+    const [x, y] = def.at; const c = comps.find(c => x >= c.x0 && x < c.x1 && y >= c.y0 && y < c.y1 && label[y * img.width + x] === c.id) || comps.filter(c => c.area > 100).sort((a, b) => Math.hypot(a.cx - x, a.cy - y) - Math.hypot(b.cx - x, b.cy - y))[0];
+    fig = { x0: c.x0, y0: c.y0, x1: c.x1, y1: c.y1, ids: new Set([c.id]) };
+  } else {
+    const [x0, y0, x1, y1] = def.box, ids = new Set();
+    for (let y = y0; y < y1; y++) for (let x = x0; x < x1; x++) { const l = label[y * img.width + x]; if (l >= 0) ids.add(l); }
+    fig = { x0, y0, x1, y1, ids };
+  }
+  const f = crop(img, label, fig, [], `props/${def.name}`);
+  if (def.fade) for (let y = 0; y < f.h; y++) for (let x = 0; x < def.fade + PAD; x++) f.px[(y * f.w + x) * 4 + 3] *= Math.max(0, x - PAD) / def.fade;
+  return { name: def.name, ...scale(f, Math.min(1, def.width / f.w)), pivot: def.pivot || { x: 0.5, y: 0.5 } };
 }
 
 // Crop a figure (its component plus attached parts) with padding, flood the background from the border to alpha 0, feather the edge pixels.
@@ -144,7 +171,7 @@ function pivotX(f) {
   return n ? Math.round(sum / n / f.w * 1000) / 1000 : 0.5;
 }
 
-async function pack(def, frames) {
+async function pack(def, frames, key = def.id) {
   // shelf packing, left to right, new shelf when the row is full
   let x = 0, y = 0, rowH = 0, maxW = 0;
   for (const f of frames) {
@@ -152,27 +179,41 @@ async function pack(def, frames) {
     f.x = x; f.y = y; x += f.w + GAP; rowH = Math.max(rowH, f.h); maxW = Math.max(maxW, x - GAP);
   }
   const aw = maxW, ah = y + rowH, atlas = new Uint8ClampedArray(aw * ah * 4);
-  const out = { frames: {}, meta: { app: 'save-martino cut-sheets', image: `${def.id}.png`, size: { w: aw, h: ah }, scale: '1', facing: def.facing, idle: null } };
+  const out = { frames: {}, meta: { app: 'save-martino cut-sheets', image: `${key}.png`, size: { w: aw, h: ah }, scale: '1', facing: def.facing, idle: null } };
   for (const f of frames) {
     for (let yy = 0; yy < f.h; yy++) atlas.set(f.px.subarray(yy * f.w * 4, (yy + 1) * f.w * 4), ((f.y + yy) * aw + f.x) * 4);
-    out.frames[f.name] = { frame: { x: f.x, y: f.y, w: f.w, h: f.h }, rotated: false, trimmed: false, spriteSourceSize: { x: 0, y: 0, w: f.w, h: f.h }, sourceSize: { w: f.w, h: f.h }, pivot: { x: pivotX(f), y: 1 } };
+    // facing: which way this pose looks; the generated boss sheets are not consistent from one pose to the next
+    out.frames[f.name] = { frame: { x: f.x, y: f.y, w: f.w, h: f.h }, rotated: false, trimmed: false, spriteSourceSize: { x: 0, y: 0, w: f.w, h: f.h }, sourceSize: { w: f.w, h: f.h },
+      pivot: f.pivot || { x: pivotX(f), y: 1 }, facing: (def.frameFacing || {})[f.name] ?? def.facing ?? 1 };
     if (f.name === 'idle') out.meta.idle = { w: f.w, h: f.h };
   }
-  await writeImage(path.join(OUT, `${def.id}.png`), aw, ah, atlas);
-  writeFileSync(path.join(OUT, `${def.id}.json`), JSON.stringify(out, null, 1));
+  await writeImage(path.join(OUT, `${key}.png`), aw, ah, atlas);
+  writeFileSync(path.join(OUT, `${key}.json`), JSON.stringify(out, null, 1));
   return out;
 }
 
 mkdirSync(OUT, { recursive: true });
 const only = process.argv.slice(2);
+const analysed = new Map(); // sheet id → { img, label, comps }, reused by the props
 for (const def of SHEETS) {
   if (only.length && !only.includes(def.id)) continue;
   console.log(`${def.id} (${def.file})`);
-  const raw = cutSheet(def, await readImage(path.join(ROOT, 'assets', def.file)));
+  const { frames: raw, ...analysis } = cutSheet(def, await readImage(path.join(ROOT, 'assets', def.file)));
+  analysed.set(def.id, analysis);
   const idle = raw.find(f => f.name === 'idle');
   const s = def.idle / idle.h;
   const frames = raw.map(f => ({ name: f.name, ...scale(f, s) }));
   for (const name of def.portraits || []) { const p = frames.find(f => f.name === name); await writeImage(path.join(OUT, `${def.id}_${name}.png`), p.w, p.h, p.px); }
   const atlas = await pack(def, frames);
   console.log(`  ${frames.length} frames, scale ${s.toFixed(3)}, atlas ${atlas.meta.size.w}×${atlas.meta.size.h}: ` + frames.map(f => `${f.name} ${f.w}×${f.h}`).join(', '));
+}
+if (!only.length || only.includes('props')) {
+  console.log('props');
+  const props = [];
+  for (const p of PROPS) {
+    if (!analysed.has(p.sheet)) { const def = SHEETS.find(d => d.id === p.sheet); const { frames: _f, ...a } = cutSheet(def, await readImage(path.join(ROOT, 'assets', def.file))); analysed.set(p.sheet, a); }
+    props.push(cutProp(p, analysed.get(p.sheet)));
+  }
+  const atlas = await pack({ id: 'props', facing: 1 }, props);
+  console.log(`  ${props.length} props, atlas ${atlas.meta.size.w}×${atlas.meta.size.h}: ` + props.map(f => `${f.name} ${f.w}×${f.h}`).join(', '));
 }

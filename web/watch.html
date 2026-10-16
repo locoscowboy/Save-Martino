@@ -112,10 +112,14 @@
   // ---------- one room ----------
   socket.on('connect', () => socket.emit('watch', { room }));
   socket.on('fail', () => { location.href = pageUrl('watch.html', ''); }); // no such game: back to the picker
-  const game = SaveMartino.createRenderer($('game'), { room, mini, base, onStart: () => socket.emit('start') });
-  socket.on('state', s => { game.push(s); overlay(s); });
+  // sound on the team laptop only: five grid cells playing at once would be noise. The browser needs one click or key first.
+  let game = null; const help = 'Enter: start the run' + (qs.get('back') ? ' · 0: back to the grid' : '');
+  if (!mini) $('help').textContent = help + ' · 🔇 click or press a key for sound';
+  fetch(base + '/content/sfx.json').then(r => r.json()).catch(() => null).then(sfx => {
+    game = SaveMartino.createRenderer($('game'), { room, mini, base, sfx, sound: !mini && !!sfx, onSound: () => { $('help').textContent = help + ' · 🔊'; } });
+  });
+  socket.on('state', s => { if (game) game.push(s); overlay(s); });
   addEventListener('keydown', e => { if (e.key === '0' && qs.get('back') === 'all') location.href = pageUrl('watch.html', 'room=all'); if (e.key === 'Enter') socket.emit('start'); });
-  if (!mini) $('help').textContent = 'Enter: start the run' + (qs.get('back') ? ' · 0: back to the grid' : '');
 
   const phoneUrl = pageUrl('phone.html', 'room=' + room);
   let qrDone = false;

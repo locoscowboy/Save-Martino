@@ -38,9 +38,15 @@ The TV opens `watch.html?room=all`: one cell per live game, keys 1-9 to go full-
 
 Jin draws one sheet per character and boss (`assets/characters/*_sheet.png`, `assets/bosses/*_sheet.png`): two rows of figures on white with a caption under each. `cd server && npm run sprites` cuts every sheet into a Phaser atlas (`assets/sprites/<id>.png` + `.json`, pivot on the feet) plus portraits (`<id>_front.png`, `martino_hero.png`, `martino_tino.png`). Commit the output. When a sheet changes layout (a fifth figure in a row, a renamed pose) edit `SHEETS` in `server/tools/cut-sheets.mjs`; when a white area sealed inside an outline stays opaque, add a `holes` seed there. `npm run sprites -- jin` does one sheet.
 
-The renderer (`web/js/renderer.js`) maps server animations to frames: players `idle / walk1 walk2 / attack / special / hurt` (down = hurt lying), bosses the same plus `throw`, `defeated`, and `hero` for Martino's intro and windup. Projectiles are still coloured dots.
+The renderer (`web/js/renderer.js`) maps server animations to frames: players `idle / walk1 walk2 / attack / special / hurt` (down = hurt lying), bosses the same plus `throw`, `defeated`, and `hero` for Martino's intro and windup. The generated boss sheets look left at rest and right in most actions, so each boss frame carries its own `facing` (the `frameFacing` table in the tool) and the renderer flips per pose.
+
+Projectiles come from the same sheets: `PROPS` in the tool cuts the plate, the feather, the baguette chunk, the sauce and the grill into `assets/sprites/props.png`; the pigeon is drawn in code. Anything without a prop falls back to a coloured dot.
 
 `npm run shots` (server running, Google Chrome installed) plays a game with scripted phones and screenshots the lobby, a story card, the fight, the phone and the TV grid into `server/shots/`.
+
+## Sound
+
+`content/sfx.json` lists the clips in `assets/sfx/` (`assets/sfx_fal/` is an alternative generation of the same ids, swap the folder name in `renderer.js` to try it). The team laptop's watch page plays them from the differences between two snapshots (`createSfx` in `renderer.js`): a character's attack or special frame, a landed hit with a random `_b` variant and a ±5 % pitch, the boss' throw/special/hurt/defeat, the story card, the boss intro, the victory fanfare. Volumes follow the manifest's tips: hits 1.0, specials 0.8, UI 0.6. The TV grid is silent. Browsers need one click or key on the page before any sound: the help line in the corner says so until it is unlocked. The phone plays the menu blip on taps.
 
 ## Balance
 

@@ -22,7 +22,8 @@
    "pivot": {
     "x": 0.418,
     "y": 1
-   }
+   },
+   "facing": 1
   },
   "threequarter": {
    "frame": {
@@ -46,7 +47,8 @@
    "pivot": {
     "x": 0.384,
     "y": 1
-   }
+   },
+   "facing": 1
   },
   "side": {
    "frame": {
@@ -70,7 +72,8 @@
    "pivot": {
     "x": 0.531,
     "y": 1
-   }
+   },
+   "facing": 1
   },
   "back": {
    "frame": {
@@ -94,7 +97,8 @@
    "pivot": {
     "x": 0.575,
     "y": 1
-   }
+   },
+   "facing": 1
   },
   "idle": {
    "frame": {
@@ -118,7 +122,8 @@
    "pivot": {
     "x": 0.417,
     "y": 1
-   }
+   },
+   "facing": 1
   },
   "walk1": {
    "frame": {
@@ -142,7 +147,8 @@
    "pivot": {
     "x": 0.506,
     "y": 1
-   }
+   },
+   "facing": 1
   },
   "walk2": {
    "frame": {
@@ -166,7 +172,8 @@
    "pivot": {
     "x": 0.552,
     "y": 1
-   }
+   },
+   "facing": 1
   },
   "attack": {
    "frame": {
@@ -190,7 +197,8 @@
    "pivot": {
     "x": 0.274,
     "y": 1
-   }
+   },
+   "facing": 1
   },
   "special": {
    "frame": {
@@ -214,7 +222,8 @@
    "pivot": {
     "x": 0.406,
     "y": 1
-   }
+   },
+   "facing": 1
   },
   "hurt": {
    "frame": {
@@ -238,7 +247,8 @@
    "pivot": {
     "x": 0.556,
     "y": 1
-   }
+   },
+   "facing": 1
   }
  },
  "meta": {

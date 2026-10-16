@@ -87,13 +87,16 @@
   const qs = new URLSearchParams(location.search);
   const base = window.SERVER;
   let roster = [], char = null, socket = null, myId = null, code = null, name = 'Player', pending = null;
+  // menu blip; a tap is the user gesture the browser wants before any sound
+  const blipAudio = new Audio(base + '/assets/sfx/ui_select.mp3'); blipAudio.volume = 0.6;
+  const blip = () => { try { blipAudio.currentTime = 0; blipAudio.play().catch(() => {}); } catch (e) {} };
 
   fetch(base + '/content/roster.json').then(r => r.json()).then(list => {
     roster = list; const host = $('chars');
     list.filter(c => !c.backup).forEach((c, i) => { // backup characters wait until their mechanic exists on the server
       const d = document.createElement('div'); d.className = 'char' + (i === 0 ? ' sel' : ''); if (i === 0) char = c.id;
       d.innerHTML = `<img src="${base}/assets/sprites/${c.id}_front.png" alt=""><div><b>${c.name}</b><small>${c.label || ''}</small><small>${c.special.split(':')[0]}</small></div>`;
-      d.addEventListener('click', () => { document.querySelectorAll('.char').forEach(x => x.classList.remove('sel')); d.classList.add('sel'); char = c.id; });
+      d.addEventListener('click', () => { document.querySelectorAll('.char').forEach(x => x.classList.remove('sel')); d.classList.add('sel'); char = c.id; blip(); });
       host.appendChild(d);
     });
   }).catch(() => { $('joinErr').textContent = 'Cannot reach the game server.'; });
@@ -129,8 +132,8 @@
     connect(() => socket.emit('join', { room: c, name, char }));
   });
   $('code').addEventListener('keydown', e => { if (e.key === 'Enter') $('go').click(); });
-  $('readyBtn').addEventListener('click', () => { if (socket && lastMe) socket.emit('ready', { ready: !lastMe.ready }); });
-  $('startBtn').addEventListener('click', () => socket && socket.emit('start'));
+  $('readyBtn').addEventListener('click', () => { if (socket && lastMe) socket.emit('ready', { ready: !lastMe.ready }); blip(); });
+  $('startBtn').addEventListener('click', () => { if (socket) socket.emit('start'); blip(); });
 
   // ---------- input ----------
   const input = { dx: 0, dy: 0, attack: false, special: false };
