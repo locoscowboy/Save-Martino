@@ -1,5 +1,5 @@
 {
-  "note": "Sound effects generated with ElevenLabs text-to-sound-effects, then trimmed of silence, peak-normalised to -1 dBFS and limited. Files live in assets/sfx/<id>.mp3. Play 'attack' on the attack frame, 'special' on the special frame, 'hit' when a hit lands, 'hurt' on the hurt frame.",
+  "note": "Sound effects generated with ElevenLabs text-to-sound-effects, then trimmed of silence, peak-normalised to -1 dBFS and limited. Files live in assets/sfx/<id>.mp3. Play 'attack' on the attack frame, 'special' on the special frame, 'hit' when a hit lands, 'hurt' on the hurt frame. Voice lines (voice_<hero>) are ElevenLabs text-to-speech (eleven_v3) with accented library voices chosen per character, trimmed and peak-normalised like the rest; alternate takes live in assets/sfx/alt.",
   "sounds": [
     {
       "id": "ui_boss_intro",
@@ -284,44 +284,56 @@
     {
       "id": "voice_euge",
       "group": "voice",
-      "seconds": 1.5,
-      "prompt": "Remo Grande!"
+      "seconds": 1.7,
+      "prompt": "Remo Grande!",
+      "voice": "Valentino, young Italian man, warm and energetic (ElevenLabs library)",
+      "alt": "alt/voice_euge_antonio.mp3: Antonio, lively Italian"
     },
     {
       "id": "voice_quentin",
       "group": "voice",
-      "seconds": 1.5,
-      "prompt": "Baguette barrage!"
+      "seconds": 1.6,
+      "prompt": "Baguette barrage!",
+      "voice": "Jamie, charismatic native French speaker (ElevenLabs library)",
+      "alt": "alt/voice_quentin_antonin.mp3: Antonin, French physical comedian"
     },
     {
       "id": "voice_jin",
       "group": "voice",
-      "seconds": 1.5,
-      "prompt": "Chopstick lightning!"
+      "seconds": 1.6,
+      "prompt": "Chopstick lightning!",
+      "voice": "Jin's own cloned voice (ElevenLabs)",
+      "alt": "alt/voice_jin_yu.mp3: Yu, upbeat young man with a Chinese accent"
     },
     {
       "id": "voice_oriana",
       "group": "voice",
-      "seconds": 2.5,
-      "prompt": "Breathe in... breathe out."
+      "seconds": 3.5,
+      "prompt": "Breathe in... breathe out.",
+      "voice": "Ginevra, soft soothing young Italian woman (ElevenLabs library)"
     },
     {
       "id": "voice_carlos",
       "group": "voice",
-      "seconds": 1.5,
-      "prompt": "Picanha on the grill!"
+      "seconds": 2.2,
+      "prompt": "Picanha on the grill!",
+      "voice": "Carlos, energetic rich middle-aged man with a Spanish accent (ElevenLabs library)",
+      "alt": "alt/voice_carlos_fernando.mp3: Fernando Martínez, Latin American"
     },
     {
       "id": "voice_bricciola",
       "group": "voice",
-      "seconds": 1.5,
-      "prompt": "A cute cat meow followed by a happy purr"
+      "seconds": 1.8,
+      "prompt": "A cute cat meow followed by a happy purr",
+      "voice": "ElevenLabs sound effect: real meow and purr, no voice"
     },
     {
       "id": "voice_tino",
       "group": "voice",
-      "seconds": 3.5,
-      "prompt": "You saved me! Grazie mille! Tino love you!"
+      "seconds": 3.9,
+      "prompt": "You saved me! Grazie mille! Tino love you!",
+      "voice": "Ginevra (Italian) pitched up 3 semitones for a small cute dog voice",
+      "alt": "alt/voice_tino_antonio.mp3: Antonio pitched up 6 semitones"
     }
   ],
   "playback_tips": [
