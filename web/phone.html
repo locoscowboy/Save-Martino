@@ -157,6 +157,9 @@
   // menu blip; a tap is the user gesture the browser wants before any sound
   const blipAudio = new Audio(base + '/assets/sfx/ui_select.mp3'); blipAudio.volume = 0.6;
   const blip = () => { try { blipAudio.currentTime = 0; blipAudio.play().catch(() => {}); } catch (e) {} };
+  // switching fighter plays that hero's special voice (assets/sfx/voice_<id>.mp3), the blip if it is missing
+  const voiceAudio = new Audio(); voiceAudio.volume = 0.9;
+  const voice = (id) => { try { voiceAudio.pause(); voiceAudio.src = base + '/assets/sfx/voice_' + id + '.mp3'; voiceAudio.currentTime = 0; voiceAudio.play().catch(blip); } catch (e) { blip(); } };
   $('stage').style.backgroundImage = `url(${base}/assets/arenas/farm.jpg)`;
 
   const ROLE = { slam: 'Crowd hitter', burst: 'Ranged', dash: 'Dasher', heal: 'Healer', zone: 'Zone', charm: 'Charm' };
@@ -232,7 +235,7 @@
     if (socket && myId && !locked()) socket.emit('char', { char });
   }
   const locked = () => !!(lastMe && lastMe.ready);
-  function pick(i, dir) { if (locked() || !roster.length) return; cur = (i + roster.length) % roster.length; blip(); showChar(dir); }
+  function pick(i, dir) { if (locked() || !roster.length) return; cur = (i + roster.length) % roster.length; showChar(dir); voice(roster[cur].id); }
   $('prev').addEventListener('click', () => pick(cur - 1, -1));
   $('next').addEventListener('click', () => pick(cur + 1, 1));
   let sx = null;

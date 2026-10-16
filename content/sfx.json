@@ -280,6 +280,48 @@
       "group": "quentin",
       "seconds": 1.5,
       "prompt": "Rapid burst of three crunchy baguette chunks firing one after another with whooshes, cartoon"
+    },
+    {
+      "id": "voice_euge",
+      "group": "voice",
+      "seconds": 1.5,
+      "prompt": "Remo Grande!"
+    },
+    {
+      "id": "voice_quentin",
+      "group": "voice",
+      "seconds": 1.5,
+      "prompt": "Baguette barrage!"
+    },
+    {
+      "id": "voice_jin",
+      "group": "voice",
+      "seconds": 1.5,
+      "prompt": "Chopstick lightning!"
+    },
+    {
+      "id": "voice_oriana",
+      "group": "voice",
+      "seconds": 2.5,
+      "prompt": "Breathe in... breathe out."
+    },
+    {
+      "id": "voice_carlos",
+      "group": "voice",
+      "seconds": 1.5,
+      "prompt": "Picanha on the grill!"
+    },
+    {
+      "id": "voice_bricciola",
+      "group": "voice",
+      "seconds": 1.5,
+      "prompt": "A cute cat meow followed by a happy purr"
+    },
+    {
+      "id": "voice_tino",
+      "group": "voice",
+      "seconds": 3.5,
+      "prompt": "You saved me! Grazie mille! Tino love you!"
     }
   ],
   "playback_tips": [

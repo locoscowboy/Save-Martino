@@ -43,14 +43,26 @@
       "text": "Venice. The glasses have been on too long. That giant barking at pigeons is Martino. Break the glasses. Save Tino!"
     },
     {
-      "seconds": 14,
+      "seconds": 21,
       "scene": "ending",
       "lines": [
         "The glasses crack and fall off.",
         "Martino shrinks back into little Tino.",
-        "Back at the villa, everyone celebrates. Tino is saved!"
+        "Back at the villa, everyone celebrates. Tino is saved!",
+        "You saved me! Grazie mille! Tino love you ❤"
       ],
-      "text": "The glasses crack and fall off. Martino shrinks back into little Tino. Back at the villa, everyone celebrates. Tino is saved!"
+      "text": "The glasses crack and fall off. Martino shrinks back into little Tino. Back at the villa, everyone celebrates. Tino is saved!",
+      "pages": [
+        {
+          "lines": 3,
+          "seconds": 14
+        },
+        {
+          "lines": 1,
+          "seconds": 7,
+          "scene": "rescue"
+        }
+      ]
     }
   ],
   "retry": "Everyone is down. {boss} is still standing. Try again!",
@@ -77,27 +89,33 @@
   "cast": {
     "euge": {
       "join": "Nobody panics on my farm. Except the dog.",
-      "down": "Not in front of the guests!"
+      "down": "Not in front of the guests!",
+      "special": "Remo Grande!"
     },
     "quentin": {
       "join": "Hold my baguette.",
-      "down": "Sacrebleu."
+      "down": "Sacrebleu.",
+      "special": "Baguette barrage!"
     },
     "jin": {
-      "join": "恭喜发财",
-      "down": "My rice!"
+      "join": "Gong xi fa cai! 恭喜发财",
+      "down": "My rice!",
+      "special": "Chopstick lightning!"
     },
     "oriana": {
-      "join": "Breathe in...... (wait 1s), then, breath out",
-      "down": "I was so calm."
+      "join": "Namaste, team.",
+      "down": "I was so calm.",
+      "special": "Breathe in... breathe out."
     },
     "carlos": {
-      "join": "Picanha can't wait",
-      "down": "My picanha!"
+      "join": "Picanha can't wait!",
+      "down": "My picanha!",
+      "special": "Picanha on the grill!"
     },
     "bricciola": {
       "join": "Meow!",
-      "down": "Meow....."
+      "down": "Meow.....",
+      "special": "Purrr... cuddle time!"
     }
   }
 }

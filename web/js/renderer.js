@@ -34,7 +34,7 @@ window.SaveMartino = (function () {
         this.arena = this.add.image(W / 2, H / 2, '__DEFAULT').setDisplaySize(W, H).setVisible(false).setDepth(0);
         this.ground = this.add.graphics().setDepth(1); // shadows and the grill's heat, under everyone
         this.sprites = new Map(); this.labels = new Map(); this.dirs = new Map();
-        this.fx = new Map(); this.bfx = { flashUntil: 0, kx: 0, ghost: 1, hitAt: -1e9, atkAt: -1e9, lastGhost: 0 }; this.ghosts = 0; this.rings = new Map(); this.lastPuff = new Map();
+        this.fx = new Map(); this.bfx = { flashUntil: 0, kx: 0, ghost: 1, hitAt: -1e9, atkAt: -1e9, lastGhost: 0 }; this.ghosts = 0; this.rings = new Map(); this.pBubbles = new Map(); this.lastPuff = new Map();
         this.hud = this.add.graphics().setDepth(9001);
         const g = this.make.graphics({ add: false }); g.fillStyle(0xffffff, 1); g.fillCircle(16, 16, 16); g.generateTexture('dot', 32, 32); g.destroy();
         // a swing crescent (opens to the right) and a four-point spark, white so a tint can colour them
@@ -165,6 +165,7 @@ window.SaveMartino = (function () {
         };
 
         const vel = (a, b) => a ? (b.x - a.x) / Math.max(30, span) * 1000 : 0; // px per second between the two snapshots
+        for (const bb of this.pBubbles.values()) bb.setVisible(false); // a hero's special line, shown below while it lasts
         for (const [id, p] of Object.entries(s.players)) {
           const pp = prev && prev.players[id]; const x = pp ? lerp(pp.x, p.x) : p.x, y = pp ? lerp(pp.y, p.y) : p.y, vx = vel(pp, p);
           g.fillStyle(0x000000, 0.3); g.fillEllipse(x, y, 50, 14);
@@ -203,6 +204,11 @@ window.SaveMartino = (function () {
           const top = sp ? sp.getBounds().top : y - PLAYER_H;
           const ly = down ? y - 70 : Math.min(top, y - 24) - 12;
           label('p:' + id, down ? p.name : `${p.name} ${'♥'.repeat(Math.max(0, p.hp))}`, x, ly);
+          if (p.say && !down) { // the special line in a bubble over the hero, like the boss's lines
+            let bb = this.pBubbles.get(id);
+            if (!bb) { bb = this.add.text(0, 0, '', { fontFamily: 'system-ui', fontSize: '16px', fontStyle: 'bold', color: '#1a0d0b', backgroundColor: '#fff6c9', padding: { x: 8, y: 4 }, wordWrap: { width: 220 } }).setOrigin(0.5, 1).setDepth(9700); this.pBubbles.set(id, bb); }
+            bb.setText(p.say).setPosition(x, ly - 18).setVisible(true);
+          }
           if (down) { // respawn countdown: a ring that fills up and the seconds left, so nobody thinks they are out
             const left = p.downT || p.down || 0, max = s.respawn || 5, frac = 1 - Math.min(1, left / max), cy = y - 40;
             this.hud.fillStyle(0x13151b, 0.75).fillCircle(x, cy, 25);
@@ -303,7 +309,7 @@ window.SaveMartino = (function () {
     const ids = ((manifest && manifest.sounds) || []).map(s => s.id), has = new Set(ids), last = new Map();
     let scene = null;
     const play = (id, { volume = 1, pitch = true, min = 0 } = {}) => {
-      if (!enabled || !scene || scene.sound.locked || !has.has(id)) return;
+      if (!enabled || !scene || scene.sound.locked || !has.has(id) || !scene.cache.audio.exists(id)) return; // a clip that failed to load (not generated yet) stays silent
       const now = performance.now(); if (now - (last.get(id) || -1e9) < Math.max(min, 60)) return; last.set(id, now);
       scene.sound.play(id, { volume, rate: pitch ? 0.95 + Math.random() * 0.1 : 1 });
     };
@@ -323,6 +329,7 @@ window.SaveMartino = (function () {
           if (b.phase === 'fight') play('ui_boss_intro', { volume: 0.6, pitch: false });
           if (b.phase === 'results') { play('ui_victory', { volume: 0.6, pitch: false }); play('tino_yip', { volume: 0.8 }); }
         }
+        if (b.phase === 'story' && b.story && b.story.scene === 'rescue' && !(a.story && a.story.scene === 'rescue')) play('voice_tino', { volume: 1, pitch: false }); // the rescue screen: Tino says thank you
         if (b.phase === 'lobby' || b.phase === 'results') {
           const ready = (s) => Object.values(s.players).filter(p => p.ready).length;
           if (Object.keys(b.players).length > Object.keys(a.players).length || ready(b) > ready(a)) play('ui_select', { volume: 0.6 });
@@ -332,7 +339,7 @@ window.SaveMartino = (function () {
           if (p.anim === 'attack' && p.anim === q.anim && p.swings !== q.swings) play(p.char + '_attack', { volume: 0.8, min: 100 }); // mashing keeps the pose, so count swings
           if (p.anim !== q.anim) {
             if (p.anim === 'attack') play(p.char + '_attack', { volume: 0.8, min: 100 });
-            if (p.anim === 'special') play(p.char + '_special', { volume: 0.8 });
+            if (p.anim === 'special') { play(p.char + '_special', { volume: 0.8 }); play('voice_' + p.char, { volume: 1, pitch: false }); }
             if (p.anim === 'hurt') { play(variant('hit_light'), { volume: 1 }); play('hurt_player', { volume: 0.7, min: 150 }); }
             if (p.anim === 'down') play('down_player', { volume: 0.9 });
           }

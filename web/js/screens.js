@@ -97,6 +97,15 @@ window.RMScreens = (function () {
         const c = panel(st, 488, 278, 458, 248, { cls: 'speed' }); c.style.background = 'radial-gradient(circle, #ffd34a, #7a2a08)'; put(c, 'martino', 'hero', .78, 230, 380); sfx(c, 'SAVE TINO!', 150, 20, 42);
         return [{ panel: a, cap: cap(st, 26, 26, s.lines[0], 560) }, { panel: b, cap: cap(st, 26, 290, s.lines[1], 430) }, { panel: c, cap: cap(st, 500, 518, s.lines[2], 430, true) }];
       },
+      // its own screen after the ending: Tino, rescued, thanks the team (his voice plays from the renderer)
+      rescue(st, s, snap) {
+        const a = panel(st, 14, 14, 932, 512, { bg: 'farm', cls: 'mg-hl' });
+        el('div', 'mg-rescue-glow', a);
+        put(a, 'martino', 'tino', 1.05, 466, 500);
+        const mine = team(snap); mine.slice(0, 3).forEach((id, i) => put(a, id, 'front', .42, [130, 800, 230][i], 500, i === 1));
+        sfx(a, '❤', 640, 90, 72, '#ff5a7a'); sfx(a, '❤', 250, 150, 54, '#ff5a7a');
+        return [{ panel: a, cap: cap(st, 260, 26, s.lines[0], 440) }];
+      },
       ending(st, s, snap) {
         const a = panel(st, 14, 14, 460, 250, { bg: 'venice' }); put(a, 'martino', 'defeated', .44, 225, 246); sfx(a, 'CRACK!', 240, 30, 52);
         const b = panel(st, 488, 14, 458, 250, { cls: 'dark speed' }); b.style.background = 'radial-gradient(circle, #fff6c9, #f4b63b 45%, #7a3a08)';
