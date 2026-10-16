@@ -4,29 +4,18 @@
 <meta charset="utf-8">
 <link rel="icon" href="data:,">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Save Martino · watch</title>
+<title>Rescue Martino · watch</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Silkscreen:wght@400;700&display=swap">
+<link rel="stylesheet" href="css/ui.css">
 <style>
   html, body { margin: 0; height: 100%; background: #0c1419; color: #ecf1ee; font-family: system-ui, sans-serif; overflow: hidden; }
   #game { width: 100%; height: 100%; display: grid; place-content: center; }
   #grid { display: grid; width: 100%; height: 100%; gap: 4px; grid-template-columns: repeat(3, 1fr); grid-auto-rows: 1fr; background: #0c1419; }
   #grid iframe { width: 100%; height: 100%; border: 0; background: #111a1f; }
   .cell { position: relative; } .cell b { position: absolute; left: 8px; top: 6px; font-size: 14px; letter-spacing: 0.15em; background: #0008; padding: 2px 8px; border-radius: 4px; }
-  #help { position: fixed; right: 10px; bottom: 8px; font-size: 12px; color: #9fb1b6; }
-  /* lobby / results overlay on top of the arena */
-  #overlay { position: fixed; inset: 0; display: none; place-content: center; text-align: center; pointer-events: none; }
-  #overlay.on { display: grid; }
-  #overlay .card { background: #111a1fd9; border: 1px solid #2e3e47; border-radius: 12px; padding: 28px 36px; display: grid; gap: 14px; justify-items: center; min-width: 320px; }
+  #help { position: fixed; right: 10px; top: 6px; font-size: 11px; color: #fffa; z-index: 40; text-shadow: 0 1px 0 #000; }
   .hint { color: #9fb1b6; font-size: 0.95rem; max-width: 46ch; }
-  .bigcode { font-size: 4rem; font-weight: 900; letter-spacing: 0.3em; color: #d9a030; line-height: 1; padding-left: 0.3em; }
-  #ovQr svg, #ovQr img { display: block; background: #fff; border-radius: 8px; }
-  .url { font-family: monospace; font-size: 0.85rem; color: #9fb1b6; word-break: break-all; max-width: 44ch; }
-  ul.roster { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; width: 320px; }
-  ul.roster li { display: grid; grid-template-columns: 40px 1fr auto; align-items: center; gap: 10px; padding: 6px 12px; border-radius: 8px; background: #1a252c; border: 1px solid #2e3e47; text-align: left; }
-  ul.roster li img { height: 48px; width: 40px; object-fit: contain; object-position: bottom; }
-  ul.roster li.ready { border-color: #2e8b57; } ul.roster li small { color: #9fb1b6; } .tick { color: #2e8b57; font-weight: 900; }
-  .result { font-size: 1.4rem; font-weight: 800; }
-  body.mini #overlay .card { padding: 10px 14px; gap: 6px; min-width: 0; transform: scale(0.8); }
-  body.mini .bigcode { font-size: 2rem; } body.mini #ovQr, body.mini .url, body.mini .hint.long { display: none; } body.mini ul.roster { width: 200px; font-size: 0.8rem; }
   /* room picker */
   #picker { height: 100%; display: none; place-content: center; gap: 16px; text-align: center; padding: 24px; }
   #picker.on { display: grid; }
@@ -39,28 +28,22 @@
 </head>
 <body>
 <div id="picker">
-  <h1>Save Martino</h1>
+  <h1>Rescue Martino</h1>
   <div class="hint">Which team is this screen for? Host a game on a phone first, then pick it here.</div>
   <div class="rooms" id="pickRooms"><div class="hint">No game yet.</div></div>
   <input id="pickCode" type="text" placeholder="or type the code" maxlength="4" autocapitalize="characters" spellcheck="false">
   <div class="hint">TV: <a href="#" id="tvLink" style="color:#3db5b0">all rooms in a grid</a></div>
 </div>
 <div id="game"></div>
-<div id="overlay"><div class="card">
-  <div class="hint">Join with the code</div>
-  <div class="bigcode" id="ovCode"></div>
-  <div id="ovQr"></div>
-  <div class="url" id="ovUrl"></div>
-  <ul class="roster" id="ovRoster"></ul>
-  <div class="result" id="ovResult"></div>
-  <div class="hint long" id="ovMsg"></div>
-</div></div>
+
 <div id="help"></div>
 <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.80.1/phaser.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
 <script src="js/config.js"></script>
 <script src="js/renderer.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/screens.js"></script>
 <script>
 (function () {
   const $ = (id) => document.getElementById(id);
@@ -120,22 +103,12 @@
   Promise.all([manifest('sfx.json'), manifest('music.json')]).then(([sfx, music]) => {
     game = SaveMartino.createRenderer($('game'), { room, mini, base, sfx, music, sound: !mini && !!(sfx || music), onSound: () => { $('help').textContent = help + ' · 🔊'; } });
   });
-  socket.on('state', s => { if (game) game.push(s); overlay(s); });
+  const phoneUrl = pageUrl('phone.html', 'room=' + room);
+  const screens = RMScreens.create(document.body, { mini, phoneUrl });
+  socket.on('state', s => { if (game) game.push(s); screens.update(s); });
+  (function loop() { screens.tick(); requestAnimationFrame(loop); })();
   addEventListener('keydown', e => { if (e.key === '0' && qs.get('back') === 'all') location.href = pageUrl('watch.html', 'room=all'); if (e.key === 'Enter') socket.emit('start'); });
 
-  const phoneUrl = pageUrl('phone.html', 'room=' + room);
-  let qrDone = false;
-  function overlay(s) {
-    const on = s.phase === 'lobby' || s.phase === 'results';
-    $('overlay').classList.toggle('on', on); if (!on) return;
-    $('ovCode').textContent = s.code;
-    if (!qrDone && !mini && window.qrcode) { qrDone = true; const qr = qrcode(0, 'M'); qr.addData(phoneUrl); qr.make(); $('ovQr').innerHTML = qr.createSvgTag({ cellSize: 5, margin: 2 }); $('ovUrl').textContent = phoneUrl; }
-    const ps = Object.entries(s.players);
-    $('ovRoster').innerHTML = ps.map(([id, p]) => `<li class="${p.ready ? 'ready' : ''}"><img src="${base}/assets/sprites/${p.char}_front.png" alt=""><span>${p.name}${id === s.host ? ' <small>host</small>' : ''}</span><span><small>${p.char}</small> <span class="tick">${p.ready ? '✓' : ''}</span></span></li>`).join('') || '<li style="display:block"><small>Nobody yet. Scan the code with your phone.</small></li>';
-    $('ovResult').textContent = s.phase === 'results' && s.result ? `Martino saved in ${fmt(s.result.time)} · ${s.result.deaths} deaths · ${s.result.wipes} wipes · MVP ${s.result.mvp}` : '';
-    const waiting = ps.filter(([, p]) => !p.ready).length;
-    $('ovMsg').textContent = !ps.length ? '' : waiting ? `Waiting for ${waiting} to be ready` : 'Everyone is ready. The host starts the run from their phone.';
-  }
   function fmt(sec) { const m = Math.floor(sec / 60), s = Math.floor(sec % 60); return `${m}:${String(s).padStart(2, '0')}`; }
 })();
 </script>

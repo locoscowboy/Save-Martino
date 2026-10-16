@@ -1,4 +1,4 @@
-// Save Martino game server. The only place the game is simulated.
+// Rescue Martino game server. The only place the game is simulated.
 import express from 'express';
 import { createServer } from 'node:http';
 import { Server } from 'socket.io';
@@ -52,6 +52,7 @@ io.on('connection', (socket) => {
     enter(r, p);
   });
   socket.on('ready', ({ ready } = {}) => { if (room) room.setReady(socket.id, ready !== false); });
+  socket.on('char', ({ char } = {}) => { if (room) room.setChar(socket.id, char); });
 
   socket.on('watch', ({ room: r } = {}) => {
     const c = codeOf(r);
@@ -96,4 +97,4 @@ setInterval(() => {
   for (const [code, r] of rooms) if (r.idleFor() > 600) rooms.delete(code);
 }, 30000);
 
-httpServer.listen(PORT, () => console.log(`Save Martino server on http://localhost:${PORT}`));
+httpServer.listen(PORT, () => console.log(`Rescue Martino server on http://localhost:${PORT}`));
