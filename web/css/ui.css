@@ -115,11 +115,10 @@
 .mp { position: relative; min-height: 100%; box-sizing: border-box; display: grid; justify-items: center; align-content: start; gap: 22px; padding: 26px 16px 40px; background: #6a9c50 center 70% / cover no-repeat fixed; color: var(--cream); font-family: system-ui, sans-serif; }
 .mp::before { content: ""; position: fixed; inset: 0; pointer-events: none; background: linear-gradient(180deg, rgba(255,170,90,.15), rgba(30,15,8,.25) 40%, rgba(20,12,8,.78)); }
 .mp > * { position: relative; }
-.mp-title { position: relative; text-align: center; animation: rm-pop .7s cubic-bezier(.3,1.5,.5,1) both; }
-.mp-title .r { display: block; font-family: var(--f-title); font-size: clamp(28px, 6vw, 46px); line-height: 1; color: var(--gold); -webkit-text-stroke: 6px var(--outline); paint-order: stroke fill; letter-spacing: .06em; transform: rotate(-3deg); }
-.mp-title .m { display: block; font-family: var(--f-title); font-size: clamp(54px, 13vw, 100px); line-height: .9; color: var(--cream); -webkit-text-stroke: 10px var(--outline); paint-order: stroke fill; text-shadow: 0 5px 0 var(--tomato), 0 9px 0 var(--outline), 0 13px 15px rgba(0,0,0,.45); }
-.mp-title .tag { font-family: var(--f-pixel); font-size: 12px; color: #fff; letter-spacing: .14em; margin-top: 14px; display: inline-block; background: rgba(20,12,8,.6); padding: 3px 9px; border-radius: 4px; }
-.mp-title .tino { position: absolute; right: -6px; top: 4px; }
+.mp-title { display: grid; justify-items: center; padding: 6px 0 2px; animation: rm-pop .6s cubic-bezier(.3,1.5,.5,1) both; }
+/* the same logo as the phone header (phone.html .logo/.sub), scaled up on wide screens */
+.mp-title .logo { font-family: var(--f-title); font-size: clamp(32px, 6.4vw, 66px); line-height: 1.05; color: var(--cream); -webkit-text-stroke: clamp(6px, 1vw, 10px) var(--outline); paint-order: stroke fill; text-shadow: 0 clamp(4px, .6vw, 6px) 0 var(--tomato); letter-spacing: .03em; white-space: nowrap; }
+.mp-title .sub { font-family: var(--f-pixel); font-size: clamp(12px, 1.3vw, 15px); color: var(--gold); letter-spacing: .2em; margin-top: 6px; text-align: center; text-shadow: 0 2px 0 #000; }
 .mp-cards { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); width: min(100%, 980px); }
 .mp-card { display: grid; gap: 8px; align-content: start; background: rgba(20,14,10,.86); border: 3px solid var(--outline); border-radius: 14px; box-shadow: 0 6px 0 var(--outline); padding: 0 18px 18px; overflow: hidden; animation: rm-pop .5s cubic-bezier(.3,1.5,.5,1) both; }
 .mp-card:nth-child(2) { animation-delay: .08s; } .mp-card:nth-child(3) { animation-delay: .16s; }

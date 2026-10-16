@@ -34,9 +34,19 @@ window.SaveMartino = (function () {
         this.arena = this.add.image(W / 2, H / 2, '__DEFAULT').setDisplaySize(W, H).setVisible(false).setDepth(0);
         this.ground = this.add.graphics().setDepth(1); // shadows and the grill's heat, under everyone
         this.sprites = new Map(); this.labels = new Map(); this.dirs = new Map();
-        this.fx = new Map(); this.bfx = { flashUntil: 0, kx: 0, ghost: 1 }; this.rings = new Map(); this.lastPuff = new Map();
+        this.fx = new Map(); this.bfx = { flashUntil: 0, kx: 0, ghost: 1, hitAt: -1e9, atkAt: -1e9, lastGhost: 0 }; this.ghosts = 0; this.rings = new Map(); this.lastPuff = new Map();
         this.hud = this.add.graphics().setDepth(9001);
         const g = this.make.graphics({ add: false }); g.fillStyle(0xffffff, 1); g.fillCircle(16, 16, 16); g.generateTexture('dot', 32, 32); g.destroy();
+        // a swing crescent (opens to the right) and a four-point spark, white so a tint can colour them
+        const crescent = (gr, cx, cy, R, T, A, alpha) => {
+          const pts = []; for (let i = 0; i <= 16; i++) { const a = -A + 2 * A * i / 16; pts.push({ x: cx + R * Math.cos(a), y: cy + R * Math.sin(a) }); }
+          for (let i = 16; i >= 0; i--) { const a = -A + 2 * A * i / 16, r = R - T * Math.cos(a / A * Math.PI / 2); pts.push({ x: cx + r * Math.cos(a), y: cy + r * Math.sin(a) }); }
+          gr.fillStyle(0xffffff, alpha).fillPoints(pts, true);
+        };
+        const sl = this.make.graphics({ add: false }); crescent(sl, 4, 56, 60, 26, 1.2, 0.35); crescent(sl, 4, 56, 56, 15, 1.15, 1); sl.generateTexture('slash', 68, 112); sl.destroy();
+        const st = this.make.graphics({ add: false });
+        st.fillStyle(0xffffff, 1).fillPoints([{ x: 12, y: 0 }, { x: 15, y: 9 }, { x: 24, y: 12 }, { x: 15, y: 15 }, { x: 12, y: 24 }, { x: 9, y: 15 }, { x: 0, y: 12 }, { x: 9, y: 9 }], true);
+        st.generateTexture('spark', 24, 24); st.destroy();
         // no pigeon on any sheet: a small one drawn here, facing right
         const pg = this.make.graphics({ add: false });
         pg.fillStyle(0x2b2b2b, 1); pg.fillEllipse(22, 18, 34, 22); pg.fillCircle(38, 11, 9);
@@ -64,27 +74,64 @@ window.SaveMartino = (function () {
         const lerp = (a, b) => a + (b - a) * k;
         const g = this.ground; g.clear(); this.bossBar.clear(); this.hud.clear();
         // game feel: hit flashes, damage numbers, shakes and squash, from the events push() found between snapshots
+        const sparks = (x, y, dir, n) => { // a burst of gold and white stars from an impact point
+          for (let i = 0; i < n; i++) {
+            const a = dir ? (dir > 0 ? 0 : Math.PI) + (Math.random() - 0.5) * 2.2 : Math.random() * Math.PI * 2, d = 40 + Math.random() * 50;
+            const c = this.add.image(x, y, 'spark').setDepth(9450).setTint(i % 2 ? 0xffffff : 0xf4b63b).setScale(0.6 + Math.random() * 0.6).setAngle(Math.random() * 90);
+            this.tweens.add({ targets: c, x: x + Math.cos(a) * d, y: y + Math.sin(a) * d, scale: 0.1, angle: c.angle + 120, duration: 260 + Math.random() * 120, ease: 'Cubic.Out', onComplete: () => c.destroy() });
+          }
+          const flashStar = this.add.image(x, y, 'spark').setDepth(9451).setScale(1.6);
+          this.tweens.add({ targets: flashStar, scale: 3.2, alpha: 0, duration: 140, onComplete: () => flashStar.destroy() });
+        };
+        const slash = (x, y, dir, tint, size) => {
+          const c = this.add.image(x, y, 'slash').setOrigin(0.15, 0.5).setFlipX(dir < 0).setDepth(9300).setTint(tint).setAlpha(0.95).setScale(0.55 * size).setAngle(dir * -25);
+          if (dir < 0) c.setOrigin(0.85, 0.5);
+          this.tweens.add({ targets: c, scale: 1.05 * size, angle: dir * 20, alpha: 0, duration: 190, ease: 'Quad.Out', onComplete: () => c.destroy() });
+        };
+        const punch = (z) => { const cam = this.cameras.main; this.tweens.killTweensOf(cam); cam.setZoom(1); this.tweens.add({ targets: cam, zoom: z, duration: 70, yoyo: true, ease: 'Quad.Out' }); };
         while (fxq.length) {
-          const e = fxq.shift(), f = (id) => { let v = this.fx.get(id); if (!v) { v = { flashUntil: 0, squashUntil: 0 }; this.fx.set(id, v); } return v; };
+          const e = fxq.shift(), f = (id) => { let v = this.fx.get(id); if (!v) { v = { flashUntil: 0, squashUntil: 0, atkAt: -1e9, hurtAt: -1e9, lastGhost: 0 }; this.fx.set(id, v); } return v; };
           if (e.t === 'boss' && s.boss) {
-            this.bfx.flashUntil = now + 90; this.bfx.kx = 9;
+            // a short white blink with a gap after it, so a boss under three attackers flickers instead of staying a white silhouette
+            if (now - this.bfx.flashUntil > 150) this.bfx.flashUntil = now + 55; this.bfx.kx = 9;
             const sp = this.sprites.get('boss'), top = sp ? sp.getBounds().top : s.boss.y - s.boss.h;
             const n = this.add.text(s.boss.x + (Math.random() - 0.5) * 40, top + 20, String(e.dmg), { fontFamily: FONT, fontSize: e.dmg >= 18 ? '34px' : '26px', color: '#f4b63b', stroke: '#2a0e08', strokeThickness: 6 }).setOrigin(0.5).setDepth(9500);
             this.tweens.add({ targets: n, y: n.y - 60, alpha: 0, scale: { from: 1.4, to: 1 }, duration: 750, ease: 'Cubic.Out', onComplete: () => n.destroy() });
             const ring = this.add.circle(s.boss.x - s.boss.facing * 20, s.boss.y - s.boss.h * 0.55, 10).setStrokeStyle(4, 0xffffff).setDepth(9400);
             this.tweens.add({ targets: ring, scale: 4, alpha: 0, duration: 260, onComplete: () => ring.destroy() });
             if (e.dmg >= 18) this.cameras.main.shake(110, 0.004);
+            // sparks fly off the side the hit came from
+            this.bfx.hitAt = now;
+            let side = -s.boss.facing, best = 1e9;
+            for (const p of Object.values(s.players)) { const d = Math.abs(p.x - s.boss.x) + Math.abs(p.y - s.boss.y); if (p.anim !== 'down' && d < best) { best = d; side = Math.sign(p.x - s.boss.x) || side; } }
+            sparks(s.boss.x + side * s.boss.w * 0.35, s.boss.y - s.boss.h * 0.5, side, e.dmg >= 18 ? 8 : 5);
           }
-          if (e.t === 'hurt') { f(e.id).flashUntil = now + 110; this.cameras.main.shake(130, 0.006); }
-          if (e.t === 'squash') f(e.id).squashUntil = now + 110;
+          if (e.t === 'bossAtk') this.bfx.atkAt = now;
+          if (e.t === 'bossDown' && s.boss) { this.cameras.main.shake(380, 0.012); punch(1.06); sparks(s.boss.x, s.boss.y - s.boss.h * 0.5, 0, 14); }
+          if (e.t === 'hurt') { const v = f(e.id); v.flashUntil = now + 110; v.hurtAt = now; this.cameras.main.shake(130, 0.006); }
+          if (e.t === 'squash') { // a swing: wind back, lunge, and a crescent in front of the weapon
+            const v = f(e.id), p = s.players[e.id]; v.squashUntil = now + 70; v.atkAt = now; v.atkKind = e.kind;
+            if (p) slash(p.x + p.facing * 34, p.y - 52, p.facing, e.kind === 'special' ? COLORS[p.char] || 0xffffff : 0xfff6e0, e.kind === 'special' ? 1.35 : 1);
+            if (e.kind === 'special') punch(1.03);
+          }
           if (e.t === 'shake') this.cameras.main.shake(250, 0.008);
           if (e.t === 'back') { const p = s.players[e.id]; if (p) { const r = this.add.circle(p.x, p.y - 48, 20).setStrokeStyle(5, 0x4fa35a).setDepth(9400); this.tweens.add({ targets: r, scale: 3, alpha: 0, duration: 450, onComplete: () => r.destroy() }); } }
         }
+        const ghost = (sp, tint, alpha, dur) => { // a fading copy of a sprite's current frame: afterimages on dashes, lunges and charges
+          if (!sp || this.ghosts > 40) return; this.ghosts++;
+          const c = this.add.image(sp.x, sp.y, sp.texture.key, sp.frame.name).setOrigin(sp.originX, sp.originY).setFlipX(sp.flipX).setScale(sp.scaleX, sp.scaleY).setAngle(sp.angle).setDepth(sp.depth - 1).setTintFill(tint).setAlpha(alpha);
+          this.tweens.add({ targets: c, alpha: 0, duration: dur, onComplete: () => { c.destroy(); this.ghosts--; } });
+        };
+        const lines = (x, y, h, dir, speed) => { // speed streaks trailing behind a fast mover, on the ground layer so they stay behind sprites
+          g.lineStyle(3, 0xffffff, 0.55);
+          for (let i = 0; i < 4; i++) { const ly = y - h * (0.2 + i * 0.2) + Math.sin(now / 37 + i * 2) * 4, len = Math.min(110, speed * 0.09) * (0.6 + ((i * 37) % 10) / 20); g.lineBetween(x - dir * 26, ly, x - dir * (26 + len), ly); }
+        };
+        const lean = (vx, max, top) => Math.max(-max, Math.min(max, vx / top * max)); // tilt into the direction of travel
         const puff = (x, y) => { const c = this.add.ellipse(x, y, 16, 8, 0xf0e6d2, 0.7).setDepth(y - 1); this.tweens.add({ targets: c, scale: 2.4, alpha: 0, x: x + (Math.random() - 0.5) * 20, y: y - 6, duration: 380, onComplete: () => c.destroy() }); };
         const arenaKey = s.boss ? s.boss.arena : 'farm';
         if (this.textures.exists('arena-' + arenaKey)) this.arena.setTexture('arena-' + arenaKey).setDisplaySize(W, H).setVisible(true); else this.arena.setVisible(false);
         const live = new Set(), liveLabels = new Set();
-        const walk = Math.floor(now / 160) % 2 ? 'walk2' : 'walk1';
+        const walk = Math.floor(now / 130) % 2 ? 'walk2' : 'walk1';
 
         const label = (id, text, x, y) => {
           let t = this.labels.get(id);
@@ -117,19 +164,40 @@ window.SaveMartino = (function () {
           live.add(id); return sp;
         };
 
+        const vel = (a, b) => a ? (b.x - a.x) / Math.max(30, span) * 1000 : 0; // px per second between the two snapshots
         for (const [id, p] of Object.entries(s.players)) {
-          const pp = prev && prev.players[id]; const x = pp ? lerp(pp.x, p.x) : p.x, y = pp ? lerp(pp.y, p.y) : p.y;
+          const pp = prev && prev.players[id]; const x = pp ? lerp(pp.x, p.x) : p.x, y = pp ? lerp(pp.y, p.y) : p.y, vx = vel(pp, p);
           g.fillStyle(0x000000, 0.3); g.fillEllipse(x, y, 50, 14);
           const down = p.anim === 'down';
           const frame = down ? 'hurt' : p.anim === 'walk' ? walk : p.anim;
           const sp = place('p:' + id, p.char, frame, x, y, p.facing, PLAYER_H, down ? { angle: p.facing > 0 ? -80 : 80, alpha: 0.55 } : {});
           if (!sp) drawBox(g, COLORS[p.char] || 0xcccccc, x, y, 48, PLAYER_H, p.facing, p.anim);
           const fx = this.fx.get(id);
-          if (sp && !down) { // squash on a swing, breathing at rest, a bob and dust while walking, white when hit
+          if (sp && !down) { // wind-up and lunge on a swing, breathing at rest, a bounce and lean while walking, afterimages when fast, white when hit
             const k = sp.scaleY, ph = id.length + id.charCodeAt(0);
-            if (fx && now < fx.squashUntil) sp.setScale(k * 1.13, k * 0.9);
+            const at = fx ? now - fx.atkAt : 1e9, dur = fx && fx.atkKind === 'special' ? 320 : 240;
+            if (at < dur) {
+              const t = at / dur, reach = fx.atkKind === 'special' ? 22 : 16;
+              const push = t < 0.18 ? -0.35 * (t / 0.18) : Math.sin((t - 0.18) / 0.82 * Math.PI) * (1 - (t - 0.18) * 0.5);
+              sp.x += p.facing * reach * push; sp.angle += p.facing * 9 * push;
+              sp.setScale(k * (1 + 0.1 * Math.max(0, push)), k * (1 - 0.07 * Math.max(0, push) + (t < 0.18 ? 0.04 : 0)));
+              if (t > 0.18 && t < 0.5 && now - fx.lastGhost > 40) { fx.lastGhost = now; ghost(sp, fx.atkKind === 'special' ? COLORS[p.char] || 0xffffff : 0xffffff, 0.45, 160); }
+            } else if (fx && now < fx.squashUntil) sp.setScale(k * 1.13, k * 0.9);
             else if (p.anim === 'idle') sp.setScale(k * (1 + Math.sin(now / 420 + ph) * 0.006), k * (1 + Math.sin(now / 420 + ph) * 0.016));
-            if (p.anim === 'walk') { sp.y -= Math.abs(Math.sin(now / 160 * Math.PI)) * 3; if (now - (this.lastPuff.get(id) || 0) > 220) { this.lastPuff.set(id, now); puff(x - p.facing * 12, y); } }
+            if (p.anim === 'walk') {
+              const c = Math.sin(now / 130 * Math.PI), b = Math.abs(c);
+              sp.y -= b * 5; sp.angle += lean(vx, 7, 230) + c * 2; sp.setScale(sp.scaleX * (1.03 - b * 0.03), sp.scaleY * (0.97 + b * 0.05));
+              if (now - (this.lastPuff.get(id) || 0) > 200) { this.lastPuff.set(id, now); puff(x - p.facing * 12, y); }
+            }
+            if (Math.abs(vx) > 500) { // a dash: streaks, ghosts and a hard lean
+              sp.angle += lean(vx, 14, 900); lines(x, y, PLAYER_H, Math.sign(vx), Math.abs(vx));
+              if (fx && now - fx.lastGhost > 30) { fx.lastGhost = now; ghost(sp, COLORS[p.char] || 0xffffff, 0.5, 200); }
+            }
+            const ht = fx ? now - fx.hurtAt : 1e9;
+            if (ht < 260) { // knocked back away from the boss, leaning back
+              const away = s.boss ? (Math.sign(x - s.boss.x) || -p.facing) : -p.facing, e = 1 - ht / 260;
+              sp.x += away * 14 * e * e; sp.angle += away * 10 * e;
+            }
             if (fx && now < fx.flashUntil) sp.setTintFill(0xffffff);
           }
           const top = sp ? sp.getBounds().top : y - PLAYER_H;
@@ -153,7 +221,7 @@ window.SaveMartino = (function () {
         }
 
         if (s.boss) {
-          const b = s.boss, pb = prev && prev.boss; const x = pb ? lerp(pb.x, b.x) : b.x, y = pb ? lerp(pb.y, b.y) : b.y;
+          const b = s.boss, pb = prev && prev.boss && prev.boss.id === b.id ? prev.boss : null; const x = pb ? lerp(pb.x, b.x) : b.x, y = pb ? lerp(pb.y, b.y) : b.y, vx = vel(pb, b);
           g.fillStyle(0x000000, 0.3); g.fillEllipse(x, y, b.w + 10, 18);
           const moves = BOSS_MOVES[b.id] || {};
           const frame = b.anim === 'dead' ? 'defeated' : b.anim === 'windup' ? (WINDUP[b.id] || 'idle') : b.anim === 'intro' ? 'hero'
@@ -161,8 +229,15 @@ window.SaveMartino = (function () {
           const windup = b.anim === 'windup';
           this.bfx.kx *= 0.82;
           const sp = place('boss', b.id, frame, x, y, b.facing, b.h, { dx: (windup ? (Math.random() - 0.5) * 10 : 0) - b.facing * this.bfx.kx, tint: windup ? 0xffd080 : 0 });
+          if (sp && b.anim !== 'dead') { // lunge into an attack, recoil when hit, a heavy stomp while walking, streaks on a charge
+            const k = sp.scaleY, at = now - this.bfx.atkAt, ht = now - this.bfx.hitAt;
+            if (at < 360) { const t = at / 360, push = t < 0.25 ? -0.4 * (t / 0.25) : Math.sin((t - 0.25) / 0.75 * Math.PI); sp.x += b.facing * 20 * push; sp.angle += b.facing * 5 * push; sp.setScale(k * (1 + 0.06 * Math.max(0, push)), k * (1 - 0.05 * Math.max(0, push) + (t < 0.25 ? 0.04 : 0))); }
+            else if (b.anim === 'idle') sp.setScale(k, k * (1 + Math.sin(now / 520) * 0.014));
+            if (ht < 120) { const e = 1 - ht / 120; sp.setScale(sp.scaleX * (1 + 0.07 * e), sp.scaleY * (1 - 0.06 * e)); sp.angle += -b.facing * 3 * e; }
+            if (b.anim === 'walk') { const c = Math.sin(now / 160 * Math.PI); sp.y -= Math.abs(c) * 4; sp.angle += lean(vx, 4, 110) + c * 1.5; }
+            if (Math.abs(vx) > 300) { sp.angle += lean(vx, 10, 700); lines(x, y, b.h, Math.sign(vx), Math.abs(vx)); if (now - this.bfx.lastGhost > 40) { this.bfx.lastGhost = now; ghost(sp, 0xffffff, 0.4, 220); } }
+          }
           if (sp && now < this.bfx.flashUntil) sp.setTintFill(0xffffff);
-          else if (sp && b.anim === 'idle') { const k = sp.scaleY; sp.setScale(k, k * (1 + Math.sin(now / 520) * 0.014)); }
           if (!sp) drawBox(g, COLORS[b.id] || 0x4a2e22, x, y, b.w, b.h, b.facing, b.anim);
           const w = 520, bx = (W - w) / 2, frac = b.hp / b.maxHp;
           this.bfx.ghost = Math.max(frac, this.bfx.ghost - 0.004); if (this.bfx.ghost < frac || (pb && pb.id !== b.id)) this.bfx.ghost = frac;
@@ -208,10 +283,12 @@ window.SaveMartino = (function () {
       if (!a || !b || b.phase !== 'fight' || a.phase !== 'fight') return;
       if (a.boss && b.boss && a.boss.id === b.boss.id && b.boss.hp < a.boss.hp) fxq.push({ t: 'boss', dmg: a.boss.hp - b.boss.hp });
       if (a.boss && b.boss && b.boss.anim === 'attack' && (a.boss.anim !== 'attack' || a.boss.move !== b.boss.move) && (b.boss.move === 'howl' || b.boss.move === 'screech' || b.boss.move === 'plates')) fxq.push({ t: 'shake' });
+      if (a.boss && b.boss && b.boss.anim === 'attack' && a.boss.anim !== 'attack') fxq.push({ t: 'bossAtk' });
+      if (a.boss && b.boss && a.boss.id === b.boss.id && b.boss.anim === 'dead' && a.boss.anim !== 'dead') fxq.push({ t: 'bossDown' });
       for (const [id, p] of Object.entries(b.players)) {
         const q = a.players[id]; if (!q) continue;
         if (p.hp < q.hp && q.anim !== 'down') fxq.push({ t: 'hurt', id });
-        if (p.anim !== q.anim && (p.anim === 'attack' || p.anim === 'special')) fxq.push({ t: 'squash', id });
+        if (p.anim !== q.anim && (p.anim === 'attack' || p.anim === 'special')) fxq.push({ t: 'squash', id, kind: p.anim });
         if (q.anim === 'down' && p.anim !== 'down') fxq.push({ t: 'back', id });
       }
       if (fxq.length > 40) fxq.splice(0, fxq.length - 40);

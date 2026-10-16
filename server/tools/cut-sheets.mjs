@@ -27,7 +27,8 @@ const CHAR_ROWS = [['front', 'threequarter', 'side', 'back'], ['idle', 'walk1', 
 const BOSS_ROWS = [['idle', 'walk1', 'walk2', 'attack'], ['throw', 'special', 'hurt', 'defeated']];
 // idle: target height of the idle frame in the atlas (2.5× the in-game size, crisp on a 1080p TV). facing: which way row 2 looks.
 const SHEETS = [
-  ...['euge', 'quentin', 'jin', 'oriana'].map(id => ({ id, file: `characters/${id}_sheet.png`, rows: CHAR_ROWS, idle: 240, facing: 1, portraits: ['front'] })),
+  ...['euge', 'quentin', 'jin', 'oriana'].map(id => ({ id, file: `characters/${id}_sheet.png`, rows: CHAR_ROWS, idle: 240, facing: 1, portraits: ['front'],
+    holes: { euge: { attack: [[0.666, 0.364]], special: [[0.456, 0.348]] } }[id] })),
   { id: 'carlos', file: 'characters/carlos_sheet.png', rows: CHAR_ROWS, idle: 240, facing: 1, portraits: ['front'], holes: {
     front: [[0.607, 0.539], [0.239, 0.529], [0.180, 0.710]], threequarter: [[0.74, 0.65], [0.202, 0.532]], back: [[0.391, 0.540], [0.762, 0.534]],
     idle: [[0.613, 0.561], [0.229, 0.509]], special: [[0.486, 0.679], [0.681, 0.774]] } },
@@ -35,7 +36,8 @@ const SHEETS = [
   // the generated boss sheets look left at rest and right for most actions: frameFacing says which pose looks which way
   { id: 'nonna', file: 'bosses/nonna_sheet.png', rows: BOSS_ROWS, idle: 375, facing: -1, frameFacing: { attack: 1, throw: 1, special: 1, hurt: 1, defeated: 1 } },
   { id: 'peacock', file: 'bosses/peacock_sheet.png', rows: BOSS_ROWS, idle: 400, facing: -1, frameFacing: { attack: 1, hurt: 1, defeated: 1 }, holes: { idle: [[0.29, 0.87]] } },
-  { id: 'martino', file: 'bosses/martino_sheet.png', rows: [['hero', 'idle', 'walk1', 'walk2', 'attack'], ['special', 'hurt', 'defeated', 'tino']], idle: 425, facing: -1, frameFacing: { attack: 1, special: 1, hurt: 1, defeated: 1, tino: 1 }, portraits: ['hero', 'tino'] },
+  { id: 'martino', file: 'bosses/martino_sheet.png', rows: [['hero', 'idle', 'walk1', 'walk2', 'attack'], ['special', 'hurt', 'defeated', 'tino']], idle: 425, facing: -1, frameFacing: { attack: 1, special: 1, hurt: 1, defeated: 1, tino: 1 }, portraits: ['hero', 'tino'],
+    holes: { attack: [[0.738, 0.439], [0.377, 0.759]], special: [[0.915, 0.064], [0.773, 0.144], [0.631, 0.208]] } },
 ];
 
 async function readImage(file) { const { data, info } = await sharp(file).ensureAlpha().raw().toBuffer({ resolveWithObject: true }); return { width: info.width, height: info.height, data }; }
