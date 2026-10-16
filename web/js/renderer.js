@@ -83,10 +83,10 @@ window.SaveMartino = (function () {
           const flashStar = this.add.image(x, y, 'spark').setDepth(9451).setScale(1.6);
           this.tweens.add({ targets: flashStar, scale: 3.2, alpha: 0, duration: 140, onComplete: () => flashStar.destroy() });
         };
-        const slash = (x, y, dir, tint, size) => {
-          const c = this.add.image(x, y, 'slash').setOrigin(0.15, 0.5).setFlipX(dir < 0).setDepth(9300).setTint(tint).setAlpha(0.95).setScale(0.55 * size).setAngle(dir * -25);
+        const slash = (x, y, dir, tint, size, from = -25, to = 20) => { // from/to: the crescent's sweep in degrees, mirrored for left-facing swings
+          const c = this.add.image(x, y, 'slash').setOrigin(0.15, 0.5).setFlipX(dir < 0).setDepth(9300).setTint(tint).setAlpha(0.95).setScale(0.55 * size).setAngle(dir * from);
           if (dir < 0) c.setOrigin(0.85, 0.5);
-          this.tweens.add({ targets: c, scale: 1.05 * size, angle: dir * 20, alpha: 0, duration: 190, ease: 'Quad.Out', onComplete: () => c.destroy() });
+          this.tweens.add({ targets: c, scale: 1.05 * size, angle: dir * to, alpha: 0, duration: 190, ease: 'Quad.Out', onComplete: () => c.destroy() });
         };
         const punch = (z) => { const cam = this.cameras.main; this.tweens.killTweensOf(cam); cam.setZoom(1); this.tweens.add({ targets: cam, zoom: z, duration: 70, yoyo: true, ease: 'Quad.Out' }); };
         while (fxq.length) {
@@ -109,10 +109,14 @@ window.SaveMartino = (function () {
           if (e.t === 'bossAtk') this.bfx.atkAt = now;
           if (e.t === 'bossDown' && s.boss) { this.cameras.main.shake(380, 0.012); punch(1.06); sparks(s.boss.x, s.boss.y - s.boss.h * 0.5, 0, 14); }
           if (e.t === 'hurt') { const v = f(e.id); v.flashUntil = now + 110; v.hurtAt = now; this.cameras.main.shake(130, 0.006); }
-          if (e.t === 'squash') { // a swing: wind back, lunge, and a crescent in front of the weapon
-            const v = f(e.id), p = s.players[e.id]; v.squashUntil = now + 70; v.atkAt = now; v.atkKind = e.kind;
-            if (p) slash(p.x + p.facing * 34, p.y - (e.n % 2 ? 40 : 56), p.facing, e.kind === 'special' ? COLORS[p.char] || 0xffffff : 0xfff6e0, e.kind === 'special' ? 1.35 : 1);
-            if (e.kind === 'special') punch(1.03);
+          if (e.t === 'squash') { // a swing: each press in a quick chain is the next move of a three-hit combo (jab, rising cut, spin finisher)
+            const v = f(e.id), p = s.players[e.id];
+            v.combo = e.kind === 'attack' && v.atkKind === 'attack' && now - v.atkAt < 650 ? (v.combo + 1) % 3 : 0;
+            v.squashUntil = now + 70; v.atkAt = now; v.atkKind = e.kind;
+            if (p && e.kind === 'special') { slash(p.x + p.facing * 34, p.y - 52, p.facing, COLORS[p.char] || 0xffffff, 1.35); punch(1.03); }
+            else if (p && v.combo === 0) slash(p.x + p.facing * 34, p.y - 52, p.facing, 0xfff6e0, 1, -25, 20);
+            else if (p && v.combo === 1) slash(p.x + p.facing * 30, p.y - 66, p.facing, 0xfff6e0, 1.1, 40, -60);
+            else if (p) { slash(p.x + p.facing * 40, p.y - 50, p.facing, 0xf4b63b, 1.3, -10, 30); this.time.delayedCall(70, () => slash(p.x - p.facing * 20, p.y - 50, -p.facing, 0xfff6e0, 0.9, -10, 30)); this.cameras.main.shake(70, 0.003); }
           }
           if (e.t === 'shake') this.cameras.main.shake(250, 0.008);
           if (e.t === 'back') { const p = s.players[e.id]; if (p) { const r = this.add.circle(p.x, p.y - 48, 20).setStrokeStyle(5, 0x4fa35a).setDepth(9400); this.tweens.add({ targets: r, scale: 3, alpha: 0, duration: 450, onComplete: () => r.destroy() }); } }
@@ -169,17 +173,24 @@ window.SaveMartino = (function () {
           const pp = prev && prev.players[id]; const x = pp ? lerp(pp.x, p.x) : p.x, y = pp ? lerp(pp.y, p.y) : p.y, vx = vel(pp, p);
           g.fillStyle(0x000000, 0.3); g.fillEllipse(x, y, 50, 14);
           const down = p.anim === 'down';
-          const frame = down ? 'hurt' : p.anim === 'walk' ? walk : p.anim;
+          const fx = this.fx.get(id);
+          const at = fx ? now - fx.atkAt : 1e9, dur = fx && fx.atkKind === 'special' ? 320 : 240, combo = fx && fx.atkKind === 'attack' ? fx.combo || 0 : 0;
+          const swinging = !down && at < dur && (p.anim === 'attack' || p.anim === 'special');
+          // the combo borrows the sheet's other poses: the rising cut crouches first, the finisher spins through the turnaround frames
+          let frame = down ? 'hurt' : p.anim === 'walk' ? walk : p.anim;
+          if (swinging && combo === 1 && at < dur * 0.22) frame = 'walk2';
+          if (swinging && combo === 2 && at < dur * 0.42) frame = ['threequarter', 'back', 'side'][Math.min(2, Math.floor(at / (dur * 0.14)))];
           const sp = place('p:' + id, p.char, frame, x, y, p.facing, PLAYER_H, down ? { angle: p.facing > 0 ? -80 : 80, alpha: 0.55 } : {});
           if (!sp) drawBox(g, COLORS[p.char] || 0xcccccc, x, y, 48, PLAYER_H, p.facing, p.anim);
-          const fx = this.fx.get(id);
           if (sp && !down) { // wind-up and lunge on a swing, breathing at rest, a bounce and lean while walking, afterimages when fast, white when hit
             const k = sp.scaleY, ph = id.length + id.charCodeAt(0);
-            const at = fx ? now - fx.atkAt : 1e9, dur = fx && fx.atkKind === 'special' ? 320 : 240;
             if (at < dur) {
-              const t = at / dur, reach = fx.atkKind === 'special' ? 22 : 16;
+              const t = at / dur, reach = fx.atkKind === 'special' ? 22 : [16, 10, 26][combo];
               const push = t < 0.18 ? -0.35 * (t / 0.18) : Math.sin((t - 0.18) / 0.82 * Math.PI) * (1 - (t - 0.18) * 0.5);
-              sp.x += p.facing * reach * push; sp.angle += p.facing * 9 * push;
+              sp.x += p.facing * reach * push;
+              if (combo === 1) { sp.y -= Math.sin(t * Math.PI) * 18; sp.angle += p.facing * (t < 0.22 ? 8 : -16 * Math.sin((t - 0.22) / 0.78 * Math.PI)); } // a hop and an upward sweep
+              else if (combo === 2 && t < 0.42) sp.angle += p.facing * -6; // spinning round
+              else sp.angle += p.facing * (combo === 2 ? 13 : 9) * push;
               sp.setScale(k * (1 + 0.1 * Math.max(0, push)), k * (1 - 0.07 * Math.max(0, push) + (t < 0.18 ? 0.04 : 0)));
               if (t > 0.18 && t < 0.5 && now - fx.lastGhost > 40) { fx.lastGhost = now; ghost(sp, fx.atkKind === 'special' ? COLORS[p.char] || 0xffffff : 0xffffff, 0.45, 160); }
             } else if (fx && now < fx.squashUntil) sp.setScale(k * 1.13, k * 0.9);
