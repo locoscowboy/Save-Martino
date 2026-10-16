@@ -52,17 +52,22 @@ Projectiles come from the same sheets: `PROPS` in the tool cuts the plate, the f
 
 Boss hp and attack patterns live in `server/game/bosses.js`. `cd server && npm run sim` plays a run with three scripted bots that never dodge and prints the time per boss, deaths and wipes; `npm run sim -- jin oriana` picks the team. Aim for 25-60 s per boss with bots: humans deal less damage and take about twice as long.
 
-## Deploy (Netlify is the event's hosting)
+## Deploy
 
-Netlify hosts static files only; it cannot hold a websocket open, so the game server runs on a laptop and the Netlify pages talk to it.
+Netlify hosts static files only; it cannot hold a websocket open, so the game server has to run somewhere else and the pages talk to it. Content, arenas, sprites and sounds are always fetched from the game server (it sends `Access-Control-Allow-Origin: *`), so Netlify only ever holds `web/`.
 
-1. Start the server on the TV laptop: `cd server && npm start`.
-2. Expose it over HTTPS (Netlify pages are HTTPS, so the socket must be `wss://`):
-   `cloudflared tunnel --url http://localhost:3000` prints a `https://xxxx.trycloudflare.com` URL.
-3. Open `https://<site>.netlify.app/?server=https://xxxx.trycloudflare.com` on the laptops and the TV. The pages carry the `server` parameter along, and the QR code on each watch page gives it to the phones. Nothing to commit when the tunnel URL changes.
-4. `SERVER_URL` in `web/js/config.js` is the fallback when the parameter is missing; leave it empty on the LAN.
+### Online: the server on Render (free, fixed URL)
 
-Content, arenas and sprites are always fetched from the game server (it sends `Access-Control-Allow-Origin: *`), so Netlify only ever holds `web/`.
+`render.yaml` describes the service. On render.com: New → Blueprint → this repository → Apply. Render builds `server/` and gives a URL such as `https://save-martino.onrender.com`. That server serves the pages too, so `https://save-martino.onrender.com/phone.html` is the whole game, Netlify or not.
+
+To make the Netlify site use it, put the URL in `SERVER_URL` in `web/js/config.js` and push.
+
+Free instances sleep after 15 minutes without requests and take about a minute to wake up: open the watch page a few minutes before the guests arrive. An open watch page pings the server every 5 minutes to keep it awake.
+
+### At the venue: the server on a laptop
+
+Lower latency and no dependence on the venue's internet: `cd server && npm start` on the TV laptop, then the LAN URLs from "Run locally". To reach that laptop through the Netlify site instead (HTTPS pages need a `wss://` socket):
+`cloudflared tunnel --url http://localhost:3000` prints a `https://xxxx.trycloudflare.com` URL; open `https://<site>.netlify.app/?server=https://xxxx.trycloudflare.com`. The pages carry the `server` parameter along and the QR code gives it to the phones, so nothing is committed when the tunnel URL changes. The parameter wins over `SERVER_URL`.
 
 If the tunnel misbehaves, the LAN URLs above still work from the server itself.
 

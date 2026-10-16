@@ -1,0 +1,13 @@
+# Render blueprint: the game server as a free web service with a fixed https URL. Render → New → Blueprint → this repo.
+# The server also serves web/, content/ and assets/, so https://save-martino.onrender.com/phone.html is the whole game.
+# Free instances sleep after 15 minutes without requests and take about a minute to wake: open the watch page early.
+services:
+  - type: web
+    name: save-martino
+    runtime: node
+    plan: free
+    rootDir: server
+    buildCommand: npm install --omit=dev
+    startCommand: npm start
+    healthCheckPath: /health
+    autoDeploy: true
