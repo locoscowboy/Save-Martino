@@ -292,9 +292,9 @@
     {
       "id": "voice_quentin",
       "group": "voice",
-      "seconds": 1.9,
+      "seconds": 1.1,
       "prompt": "Bagarre!",
-      "voice": "Jamie, charismatic native French speaker (ElevenLabs library), shouted take",
+      "voice": "Jamie, native French speaker (ElevenLabs library), shouted \"Bagarre !\" in French",
       "alt": "alt/voice_quentin_take2.mp3: second take, same voice"
     },
     {
