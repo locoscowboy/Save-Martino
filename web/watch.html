@@ -71,6 +71,7 @@
   const pageUrl = (page, params) => location.origin + location.pathname.replace(/[^/]*$/, page) + '?' + params + sqs;
   const socket = io(base, { transports: ['websocket', 'polling'] });
   if (mini) document.body.classList.add('mini');
+  setInterval(() => fetch(base + '/health').catch(() => {}), 5 * 60 * 1000); // a plain request now and then keeps a free Render instance awake
 
   // ---------- picker: no room in the URL ----------
   if (!room) {
