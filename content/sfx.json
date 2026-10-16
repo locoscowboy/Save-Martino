@@ -1,5 +1,5 @@
 {
-  "note": "Sound effects generated with ElevenLabs text-to-sound-effects, then trimmed of silence, peak-normalised to -1 dBFS and limited. Files live in assets/sfx/<id>.mp3. Play 'attack' on the attack frame, 'special' on the special frame, 'hit' when a hit lands, 'hurt' on the hurt frame. Voice lines (voice_<hero>) are ElevenLabs text-to-speech (eleven_v3) with accented library voices chosen per character, trimmed and peak-normalised like the rest; alternate takes live in assets/sfx/alt.",
+  "note": "Sound effects generated with ElevenLabs text-to-sound-effects, then trimmed of silence, peak-normalised to -1 dBFS and limited. Files live in assets/sfx/<id>.mp3. Play 'attack' on the attack frame, 'special' on the special frame, 'hit' when a hit lands, 'hurt' on the hurt frame. Voice lines (voice_<hero>) are ElevenLabs text-to-speech (eleven_v3) with accented library voices chosen per character, trimmed and peak-normalised like the rest; alternate takes live in assets/sfx/alt. Second pass 2026-10-16: eleven_v3 with emotion tags ([shouting excitedly] etc.), stability 0, ElevenLabs audio isolation for a clean background (pad to 5 s first, the endpoint needs 4.6 s), then trimmed and sped up 10 %.",
   "sounds": [
     {
       "id": "ui_boss_intro",
@@ -284,41 +284,42 @@
     {
       "id": "voice_euge",
       "group": "voice",
-      "seconds": 1.7,
+      "seconds": 2.0,
       "prompt": "Remo Grande!",
-      "voice": "Valentino, young Italian man, warm and energetic (ElevenLabs library)",
-      "alt": "alt/voice_euge_antonio.mp3: Antonio, lively Italian"
+      "voice": "Antonio, lively young Italian man (ElevenLabs library), shouted take",
+      "alt": "alt/voice_euge_take2.mp3: second take, same voice"
     },
     {
       "id": "voice_quentin",
       "group": "voice",
-      "seconds": 1.6,
+      "seconds": 1.9,
       "prompt": "Baguette barrage!",
-      "voice": "Jamie, charismatic native French speaker (ElevenLabs library)",
-      "alt": "alt/voice_quentin_antonin.mp3: Antonin, French physical comedian"
+      "voice": "Jamie, charismatic native French speaker (ElevenLabs library), shouted take",
+      "alt": "alt/voice_quentin_take2.mp3: second take, same voice"
     },
     {
       "id": "voice_jin",
       "group": "voice",
-      "seconds": 1.6,
+      "seconds": 1.5,
       "prompt": "Chopstick lightning!",
-      "voice": "Jin's own cloned voice (ElevenLabs)",
-      "alt": "alt/voice_jin_yu.mp3: Yu, upbeat young man with a Chinese accent"
+      "voice": "Jin's own cloned voice (ElevenLabs), shouted take",
+      "alt": "alt/voice_jin_take2.mp3: second take, same voice"
     },
     {
       "id": "voice_oriana",
       "group": "voice",
-      "seconds": 3.5,
+      "seconds": 3.0,
       "prompt": "Breathe in... breathe out.",
-      "voice": "Ginevra, soft soothing young Italian woman (ElevenLabs library)"
+      "voice": "Ginevra, young Italian woman (ElevenLabs library), energetic encouraging take",
+      "alt": "alt/voice_oriana_take2.mp3: second take, same voice"
     },
     {
       "id": "voice_carlos",
       "group": "voice",
-      "seconds": 2.2,
+      "seconds": 2.1,
       "prompt": "Picanha on the grill!",
-      "voice": "Carlos, energetic rich middle-aged man with a Spanish accent (ElevenLabs library)",
-      "alt": "alt/voice_carlos_fernando.mp3: Fernando Martínez, Latin American"
+      "voice": "Carlos, energetic middle-aged man with a Spanish accent (ElevenLabs library), shouted with joy",
+      "alt": "alt/voice_carlos_take2.mp3: second take, same voice"
     },
     {
       "id": "voice_bricciola",
@@ -330,10 +331,10 @@
     {
       "id": "voice_tino",
       "group": "voice",
-      "seconds": 3.9,
+      "seconds": 4.2,
       "prompt": "You saved me! Grazie mille! Tino love you!",
-      "voice": "Ginevra (Italian) pitched up 3 semitones for a small cute dog voice",
-      "alt": "alt/voice_tino_antonio.mp3: Antonio pitched up 6 semitones"
+      "voice": "Ginevra (Italian) pitched up 3 semitones, very happy take",
+      "alt": "alt/voice_tino_take2.mp3: second take, same voice"
     }
   ],
   "playback_tips": [
